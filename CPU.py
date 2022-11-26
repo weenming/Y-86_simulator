@@ -62,6 +62,7 @@ class CPU():
         return
 
     def write_back_stage(self):
+        self.registers.write(self.valE, self.rB)
         self.registers.write(self.valM, self.rA)
         return
 
