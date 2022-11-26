@@ -3,12 +3,9 @@ class Registers():
         print("init regs")
         return
 
-    def read(add):
-        '''
-        Register files allow a max number of 2 read ports
-        '''
+    def read(self, address):
         val = None
         return val
 
-    def write(add, val):
+    def write(self, address, val):
         return True
