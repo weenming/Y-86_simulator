@@ -49,9 +49,7 @@ class CPU():
     def decode_stage(self):
         r1, r2 = decode.select_read_reg_srcs(self)
 
-        # if some instructions
         self.valA = self.registers.read(r1)
-        # if some other instructions
         self.valB = self.registers.read(r2)
         return
 
@@ -59,9 +57,9 @@ class CPU():
         op1, op2, operator = execute.select_operation(self)
 
         self.valE, cc_info = self.ALU.op64(operator, op1, op2)
-        if execute.do_update_cc(self):
+        if execute.do_update_cc(self):  # OPq
             self.cond_code.set(cc_info)
-        if execute.do_update_cnd(self):
+        if execute.do_update_cnd(self):  # cmovq or jXX
             self.cnd = self.cond_code.is_condition(self.icode, self.ifun)
         return
 
@@ -75,6 +73,9 @@ class CPU():
 
     def write_back_stage(self):
         reg_adr, val = write_back.select_write_back(self)
+        self.registers.write(reg_adr, val)
+
+        reg_adr, val = write_back.select_write_back_2nd(self)  # popq only
         self.registers.write(reg_adr, val)
         return
 
@@ -94,11 +95,31 @@ class CPU():
 
     def show_cpu(self):
         print('ins name:', self.instruct_mem.get_instruction_name())
-        print('valA:', self.valA)
-        print('valB:', self.valB)
-        print('valC:', self.valC)
-        print('valE:', self.valE)
-        print('valM:', self.valM)
+        if self.valA is not None:
+            print('valA:', self.valA.get_str_hex())
+        else:
+            print('valA: None')
+
+        if self.valB is not None:
+            print('valB:', self.valB.get_str_hex())
+        else:
+            print('valB: None')
+
+        if self.valC is not None:
+            print('valC:', self.valC.get_str_hex())
+        else:
+            print('valC: None')
+
+        if self.valE is not None:
+            print('valE:', self.valE.get_str_hex())
+        else:
+            print('valE: None')
+
+        if self.valM is not None:
+            print('valM:', self.valM.get_str_hex())
+        else:
+            print('valM: None')
+
         print('valP:', self.valP)
         print('rA:', self.rA)
         print('rB:', self.rB)

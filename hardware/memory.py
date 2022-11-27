@@ -23,9 +23,11 @@ class Memory:
 
     def read(self, adr):
         '''
-        Returns a Word type: red 8 bytes from adr, and convert little endian
+        Returns a Word type: red EIGHT BYTES from adr, and convert little endian
         data into Word type (big endian, I think)
         '''
+        if adr is None:
+            return
         assert adr >= 0 and adr + 8 < self.max_adr, 'invalid mem adr when reading'
         # be: big endian; le: little endian
         byte_ls_le = self.mem_bytes[adr: adr + 8]
@@ -46,6 +48,8 @@ class Memory:
         Convert a Word type into 8 bytes arranged in the little endian order
         and then write it to memory
         '''
+        if adr is None or val is None:
+            return
         assert adr + 8 < self.max_adr, 'invalid mem adr: too big'
         assert adr >= self.rsp_min, 'invalid mem adr: access to read-only denied'
         for i in range(8):

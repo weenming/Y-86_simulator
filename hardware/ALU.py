@@ -8,7 +8,7 @@ class ALU():
     def __init__(self):
         return
 
-    def op64(operator, operand1, operand2):
+    def op64(self, operator, operand1, operand2):
         cc_info = None
 
         if operator == '+':

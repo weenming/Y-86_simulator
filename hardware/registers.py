@@ -6,6 +6,7 @@ from abstraction import *
 
 class Registers():
     def __init__(self):
+        self.names = ['rax', 'rbx'] + ['todo'] * 13
         self.regs = []
         for _ in range(15):
             self.regs.append(Word(0))
@@ -16,8 +17,8 @@ class Registers():
         return
 
     def show_regs_hex(self):
-        for reg in self.regs:
-            print(reg.get_str_hex())
+        for i in range(len(self.regs)):
+            print(f'{self.names[i]}({i}):', self.regs[i].get_str_hex())
         return
 
     def read(self, address):
