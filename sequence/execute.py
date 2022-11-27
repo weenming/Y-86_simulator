@@ -1,6 +1,7 @@
-def select_operands(icode, ifun, valA, valB, valC):
-    return
+from CPU import *
 
 
-def select_operator(icode, ifun):
+def select_operation(cpu: CPU):
+    icode = cpu.instruct_mem.icode
+    if icode == 0:
     return
