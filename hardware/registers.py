@@ -24,14 +24,20 @@ class Registers():
         '''
         Returns a Word type data
         '''
+        if address == 15 or address is None:
+            return False
         # maybe the exception handling need improvement
-        assert 0 <= address < 15, 'bad register address'
+        if 0 <= address < 15:
+            raise 'invalid register address'
         return self.regs[address]
 
     def write(self, address, val):
         '''
         val should be Word type.
         '''
-        assert 0 <= address < 15, 'bad register address'
+        if address == 15 or val is None or address is None:
+            return False
+        if 0 <= address < 15:
+            raise 'invalid register address'
         self.regs[address] = val
         return True

@@ -81,6 +81,10 @@ class DataArb:
         b = Byte(self._value[n * 8: (n + 1) * 8])
         return b
 
+    def get_bits(self, start, end):
+        assert start >= 0 and end < self.get_bit_len()
+        return DataArb(self._value[start: end])
+
     def append_byte(self, s):
         assert type(s) == Byte
         try:

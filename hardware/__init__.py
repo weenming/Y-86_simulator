@@ -1,4 +1,3 @@
-from hardware.CondCode import *
 from hardware.ALU import *
 from hardware.Clock import *
 from hardware.Memory import *
