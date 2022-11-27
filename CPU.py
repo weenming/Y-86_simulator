@@ -23,6 +23,7 @@ class CPU():
     def __init__(self):
         self.ALU = ALU()
         self.cond_code = CondCode()
+        self.stat = Stat()
         self.memory = Memory()
         self.registers = Registers()
         # 'artificially' divide instruction men and run-time mem
@@ -32,7 +33,10 @@ class CPU():
 
     def fetch_stage(self):
         # Whether or not get valC
-        self.instruct_mem.update(get_instruction(self.PC))
+        try:
+            self.instruct_mem.update(get_instruction(self.PC))
+        except AssertionError:
+            self.stat.set_INS()
         # get icode and ifun internally
         # self.icode, self.ifun = self.instruct_mem.fetch()
 
@@ -46,17 +50,17 @@ class CPU():
         return
 
     def decode_stage(self):
-        # if some instructions
-        self.valA = self.registers.read(self.rA)
-        # if some other instructions
-        self.valB = self.registers.read(self.rB)
-
+        try:
+            # if some instructions
+            self.valA = self.registers.read(self.rA)
+            # if some other instructions
+            self.valB = self.registers.read(self.rB)
+        except AssertionError:
+            self.stat.set_ADR()
         return
 
     def execute_stage(self):
-        op1, op2 = sequence.execute.select_operands(
-            self.instruct_mem, self.valA, self.valB, self.valC)
-        operator = sequence.execute.select_operator(self.instruct_mem)
+        op1, op2, operator = sequence.execute.select_operation(self)
         self.valE, cc_info = self.ALU.op64(operator, op1, op2)
         if self.instruct_mem.do_update_cc():
             self.cond_code.set(cc_info)
@@ -64,11 +68,14 @@ class CPU():
         return
 
     def memory_stage(self):
-        write_dest = sequence.memory.select_write_dest(self.instruct_mem, )
-        write_val = sequence.memory.select_write_val(self.instruct_mem)
-        read_src = sequence.memory.select_write_val(self.instruct_mem)
-        self.memory.write(self.valE, self.valA)
-        self.valM = self.memory.read(self.valE)
+        write_dest = sequence.memory.select_write_dest(self)
+        write_val = sequence.memory.select_write_val(self)
+        read_src = sequence.memory.select_write_val(self)
+        try:
+            self.memory.write(self.valE, self.valA)
+            self.valM = self.memory.read(self.valE)
+        except AssertionError:
+            self.stat.set_ADR()
         return
 
     def write_back_stage(self):
@@ -76,7 +83,10 @@ class CPU():
             self.cnd = self.instruct_mem.get_cnd(self.cond_code)
         if self.name != 'jXX' or self.cnd == 1:
             self.registers.write(self.valE, self.rB)
-        self.registers.write(self.valM, self.rA)
+        try:
+            self.registers.write(self.valM, self.rA)
+        except AssertionError:
+            self.stat.set_ADR()
         return
 
     def update_PC(self):
