@@ -31,6 +31,7 @@ class DataArb:
 
     def _load_str_hex(self, h):
         self._load_int10(int(h, 16))
+        self._add_zeros_for_hex((len(h) - 2) * 4)  # len except '0x'
         return
 
     def _load_int10(self, x):
@@ -43,6 +44,10 @@ class DataArb:
             # not sure if safe
             x >>= 1
         return True
+
+    def _add_zeros_for_hex(self, target_len):
+        for _ in range(target_len - len(self._value)):
+            self._value.insert(0, 0)
 
     def _load_list(self, ls):
         self._value = []
@@ -82,7 +87,7 @@ class DataArb:
         return b
 
     def get_bits(self, start, end):
-        assert start >= 0 and end < self.get_bit_len()
+        assert start >= 0 and end <= self.get_bit_len()
         return DataArb(self._value[start: end])
 
     def append_byte(self, s):
@@ -97,27 +102,80 @@ class DataArb:
     def _check_validity(self):
         return True
 
+    def is_zero(self):
+        if self.get_value_int10() == 0:
+            return True
+        else:
+            return False
+
 
 class Word(DataArb):
     def __init__(self, s):
         '''
         initialize data using string
         '''
+        self.neg = False
         self._value = None
         # use only the same name binding, but in the cur frame, so all rewritten methods are substituted
         super().__init__(s)
         self._add_zeros()
         assert self._check_validity(), 'bad input Word!'
+        if self._value[0] == 1:
+            self.neg = True
 
     def _add_zeros(self):
         for _ in range(64 - len(self._value)):
             self._value.insert(0, 0)
 
     def _check_validity(self):
-        if self._value is not None and self.get_value_int10() < 2 ** 64:
+        if self._value is not None and self.get_bit_len() == 64:
             return True
         else:
             return False
+
+    def _load_int10(self, x):
+        # Convert decimal int to list of "binary" numbers (still decimal but
+        # has an either 0 or 1 value)
+        # keep the value same
+        self._value = []
+        if x < 0:
+            self.neg = True
+            x = -x - 1
+            while x > 0:
+                self._value.insert(0, x % 2)
+                # not sure if safe
+                x >>= 1
+            self._add_zeros()
+            self._value = self._get_inv_bits()
+        else:
+            while x > 0:
+                self._value.insert(0, x % 2)
+                # not sure if safe
+                x >>= 1
+            self._add_zeros()
+        return True
+
+    def _get_inv_bits(self):
+        bits = []
+        for b in self._value:
+            bits.append(b)
+        return bits
+
+    def get_value_int10(self):
+        # returns a decimal equal to the value of the data
+        if self.neg:
+            res = 0
+            tmp_bits = self._get_inv_bits()
+            for b in tmp_bits[1:]:
+                res *= 2
+                res += b
+            res = -res - 1
+        else:
+            res = 0
+            for b in self._value[1:]:
+                res *= 2
+                res += b
+        return res
 
 
 class Byte(DataArb):
@@ -132,7 +190,17 @@ class Byte(DataArb):
             self._value.insert(0, 0)
 
     def _check_validity(self):
-        if self._value is not None and self.get_value_int10() < 2 ** 8:
+        if self._value is not None and self.get_bit_len() == 8:
             return True
         else:
             return False
+
+
+class UnsignedWord(DataArb):
+    def __init__(self, s):
+        '''
+        initialize data using string
+        '''
+        # use only the same name binding, but in the cur frame, so all rewritten methods are substituted
+        super().__init__(s)
+        self.neg = False

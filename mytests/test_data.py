@@ -10,6 +10,7 @@ sys.path.append("./")
 
 from hardware import *
 from abstraction import *
+import math
 
 
 def test_data():
@@ -86,6 +87,30 @@ def test_word():
     data.print_bit_ls()
     print(data.get_value_int10())
 
+    print("init with large int")
+    data = Word(round(2 ** 64 - 1))
+    data.print_bit_ls()
+    print(data.get_value_int10())
+
+    print('unsigned word:')
+    data = UnsignedWord(round(2 ** 64 - 1))
+    data.print_bit_ls()
+    print(data.get_value_int10())
+    print(f'log 2: {math.log2(data.get_value_int10())}')
+
+    print("init with too large int")
+    try:
+        data = Word(round(2 ** 64))
+        data.print_bit_ls()
+        print(data.get_value_int10())
+    except AssertionError:
+        print('cannot init with int $\ge 2^64$')
+
+    print("init with neg int")
+    data = Word(-90)
+    data.print_bit_ls()
+    print(data.get_value_int10())
+
     print("init with int ls")
     data = Word([0, 1, 0, 1, 1, 0, 1, 0] * 8)
     data.print_bit_ls()
@@ -97,11 +122,8 @@ def test_ragged():
     print(data_arb.get_nth_byte(0).get_value_int10())
 
 
-hello()
-
 if __name__ == '__main__':
     test_data()
     test_byte()
     test_word()
     test_ragged()
-    mem = memory()

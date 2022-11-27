@@ -1,14 +1,8 @@
 from hardware import *
 from abstraction import *
-import sequence.fetch
-
-
-def get_instruction():
-    '''
-    get instruction code after processing a given file
-    returns a DataArb type instance
-    '''
-    return
+from sequence import *
+import error
+print('importing cpu')
 
 
 class CPU():
@@ -16,27 +10,31 @@ class CPU():
     Abstraction level of the CPU, see components like memory, c.c.,
     ALU and regs as 'black boxes'
     Wires are, however, visible here. Therefore the data transmission
-     should be explicitly modeled. Some complicated functions can be called 
+     should be explicitly modeled. Some complicated functions can be called
      from the module 'sequence'.
     '''
 
-    def __init__(self):
+    def __init__(self, mem: Memory, get_ins=None):
         self.ALU = ALU()
         self.cond_code = CondCode()
         self.stat = Stat()
-        self.memory = Memory()
+        # need to read memory (for programs) from external file
+        self.memory = mem
         self.registers = Registers()
         # 'artificially' divide instruction men and run-time mem
         self.instruct_mem = InstructMem()
-
+        self.get_ins = get_ins
         self.PC = 0
+        self._clear_tmp()
+        if get_ins == None:  # default: get instructions from memory
+            self.get_ins = self.memory.get_ins
 
     def fetch_stage(self):
         # Whether or not get valC
-        try:
-            self.instruct_mem.update(get_instruction(self.PC))
-        except AssertionError:
-            self.stat.set_INS()
+        ins = self.get_ins(self.PC)
+        self.icode, self.ifun = self.instruct_mem.update(ins)
+        if self.icode == 0:
+            raise error.Halt
         # get icode and ifun internally
         # self.icode, self.ifun = self.instruct_mem.fetch()
 
@@ -46,68 +44,63 @@ class CPU():
         self.valP = self.PC + self.instruct_mem.calc_valP()
 
         self.valC = self.instruct_mem.get_valC()
-        self.name = self.instruct_mem.get_instruction_name()
         return
 
     def decode_stage(self):
-        try:
-            # if some instructions
-            self.valA = self.registers.read(self.rA)
-            # if some other instructions
-            self.valB = self.registers.read(self.rB)
-        except AssertionError:
-            self.stat.set_ADR()
+        r1, r2 = decode.select_read_reg_srcs(self)
+
+        # if some instructions
+        self.valA = self.registers.read(r1)
+        # if some other instructions
+        self.valB = self.registers.read(r2)
         return
 
     def execute_stage(self):
-        op1, op2, operator = sequence.execute.select_operation(self)
-        self.valE, cc_info = self.ALU.op64(operator, op1, op2)
-        if self.instruct_mem.do_update_cc():
-            self.cond_code.set(cc_info)
+        op1, op2, operator = execute.select_operation(self)
 
+        self.valE, cc_info = self.ALU.op64(operator, op1, op2)
+        if execute.do_update_cc(self):
+            self.cond_code.set(cc_info)
+        if execute.do_update_cnd(self):
+            self.cnd = self.cond_code.is_condition(self.icode, self.ifun)
         return
 
     def memory_stage(self):
-        write_dest = sequence.memory.select_write_dest(self)
-        write_val = sequence.memory.select_write_val(self)
-        read_src = sequence.memory.select_write_val(self)
-        try:
-            self.memory.write(self.valE, self.valA)
-            self.valM = self.memory.read(self.valE)
-        except AssertionError:
-            self.stat.set_ADR()
+        write_dest_adr, write_val = memory.select_write(self)
+        read_src_adr = memory.select_read(self)
+
+        self.memory.write(write_dest_adr, write_val)
+        self.valM = self.memory.read(read_src_adr)
         return
 
     def write_back_stage(self):
-        if self.name in ['cmovXX', 'jXX']:
-            self.cnd = self.instruct_mem.get_cnd(self.cond_code)
-        if self.name != 'jXX' or self.cnd == 1:
-            self.registers.write(self.valE, self.rB)
-        try:
-            self.registers.write(self.valM, self.rA)
-        except AssertionError:
-            self.stat.set_ADR()
+        reg_adr, val = write_back.select_write_back(self)
+        self.registers.write(reg_adr, val)
         return
 
     def update_PC(self):
         # PC = ...
-        if self.name == 'jXX':
-            if self.cnd:
-                self.PC = self.valC
-            else:
-                self.PC = self.valP
-        elif self.name == 'call':
-            self.PC = self.valC
-        elif self.name == 'ret':
-            self.PC = self.valM
-        else:
-            self.PC = self.valP
+        val = update_PC.select_PC_val(self)
+        self.PC = val
         return
 
-    def clear_tmp(self):
+    def _clear_tmp(self):
         self.valA = self.valB = self.valC = None
         self.rA = self.rB = None
-        self.valE = self.valF = None
+        self.valE = self.valM = None
         self.valP = None
         self.valM = None
         # ...
+
+    def show_cpu(self):
+        print('ins name:', self.instruct_mem.get_instruction_name())
+        print('valA:', self.valA)
+        print('valB:', self.valB)
+        print('valC:', self.valC)
+        print('valE:', self.valE)
+        print('valM:', self.valM)
+        print('valP:', self.valP)
+        print('rA:', self.rA)
+        print('rB:', self.rB)
+        print('PC:', self.PC)
+        self.cond_code.show()

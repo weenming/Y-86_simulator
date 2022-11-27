@@ -2,7 +2,6 @@ import sys
 sys.path.append("./")
 
 from abstraction import *
-from hardware.Clock import *
 
 
 class InstructMem():
@@ -13,19 +12,24 @@ class InstructMem():
         return
 
     def update(self, data: DataArb):
+        # The adr/instant number in argument `data` should be big-endian if applicable
+        # So that conversion from mem data in little-endian is not required
         self.data = data
         self.len = self.data.get_bit_len()
         assert self.len % 8 == 0, 'instructions must be integer times of bytes!'
         assert self.len != 0, 'instructions cannot be empty!'
-        # len in byte
-        self.len /= 8
+        # len in byte: / is float division
+        self.len //= 8
 
         # set icode and others if applicable
         self.icode = self.data.get_bits(0, 4).get_value_int10()
         self.ifun = self.data.get_bits(4, 8).get_value_int10()
         assert 0 <= self.icode < 12, 'invalid icode'
+        assert self._check_validity(), 'invalid instruction'
+        return self.icode, self.ifun
 
-        return
+    def _check_validity(self):
+        return True
 
     def get_instruction_name(self):
         names = ['halt', 'nop', 'rrmovq', 'irmovq', 'rmmovq', 'mrmovq',
@@ -55,22 +59,3 @@ class InstructMem():
 
     def calc_valP(self):
         return self.len
-
-    def is_condition(self, cc: CondCode):
-        # not tested
-        assert self.icode in [2, 7]
-        if self.ifun == 0:
-            return True
-        elif self.ifun == 1:  # le
-            # python does not have suitable bitwise not...
-            return (cc.SF ^ cc.OF) | (cc.ZF)
-        elif self.ifun == 2:  # l
-            return cc.SF ^ cc.OF
-        elif self.ifun == 3:  # e
-            return cc.ZF
-        elif self.ifun == 4:  # ne
-            return ~cc.ZF
-        elif self.ifun == 5:  # ge
-            return ~(cc.SF ^ cc.OF)
-        elif self.ifun == 6:  # g
-            return ~(cc.SF ^ cc.OF) & ~cc.ZF
