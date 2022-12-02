@@ -103,7 +103,7 @@ class DataArb:
         return True
 
     def is_zero(self):
-        if self._get_value_int10() == 0:
+        if self.get_value_int10() == 0:
             return True
         else:
             return False

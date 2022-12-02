@@ -107,28 +107,45 @@ def test_irmovq():
 
 
 def test_rmmovq():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
+    # def get_ins_rrmovq(PC):
+    #     return DataArb('0x')
+    mem = Memory([Byte(0x40), Byte(0x01), Byte(
+        0x20), Byte(0x00), Byte(0x0), Byte(0x00), Byte(0x0), Byte(0x0), Byte(0x0), Byte(0x0)])  # D = 0x20
+    cpu = CPU(mem, get_ins=None)
     cpu.PC = 0
+    cpu.registers.write(0, Word('0xabcdef'))  # val to move to mem = 0xabcdef
+    cpu.registers.write(1, Word(0x2))  # adr to write += 0x2, adr is 0x22 now
+
     cpu.fetch_stage()
-    print("after fetch:")
+    print("\nAfter fetch:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=False, show_ins=True)
+
     cpu.decode_stage()
-    print("after decode:")
+    print("\nAfter decode:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=False, show_ins=True)
+
     cpu.execute_stage()
-    print("after execute:")
+    print("\nAfter execute:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=False, show_ins=True)
+
     cpu.memory_stage()
-    print("after memory:")
+    print("\nAfter memory:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=False, show_ins=True)
+
     cpu.write_back_stage()
-    print("after write back:")
+    print("\nAfter write back:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+    cpu.memory.show_mem(show_zero=False, show_ins=True)
+
     cpu.update_PC()
-    print("after update PC:")
+    print("\nAfter update PC:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=False, show_ins=True)
 
 
 def test_mrmovq():
@@ -307,4 +324,4 @@ def test_popq():
 
 
 if __name__ == '__main__':
-    test_irmovq()
+    test_rmmovq()

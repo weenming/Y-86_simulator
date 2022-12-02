@@ -38,7 +38,7 @@ class CPU():
         # get icode and ifun internally
         # self.icode, self.ifun = self.instruct_mem.fetch()
 
-        # rA and rB are the ADDRESSES of the registers
+        # rA and rB are the ADDRESSES of the registers and they are INTs!!!
         self.rA, self.rB = self.instruct_mem.get_reg_address()
         # given the current instruction, calculate the next PC
         self.valP = self.PC + self.instruct_mem.calc_valP()
@@ -66,7 +66,7 @@ class CPU():
     def memory_stage(self):
         write_dest_adr, write_val = memory.select_write(self)
         read_src_adr = memory.select_read(self)
-
+        # memory adr is a Word, and so is val
         self.memory.write(write_dest_adr, write_val)
         self.valM = self.memory.read(read_src_adr)
         return

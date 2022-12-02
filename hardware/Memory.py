@@ -14,7 +14,7 @@ class Memory:
         print('init mem')
 
         # stack cannot grow into space of program code
-        self.rsp_min = len(byte_ls)
+        self.rsp_min = len(byte_ls) + 8 - len(byte_ls) % 8
         while len(byte_ls) < max_adr:
             byte_ls.append(Byte(0))
         self.mem_bytes = byte_ls
@@ -43,13 +43,15 @@ class Memory:
             bit_ls = byte.get_bit_ls() + bit_ls
         return bit_ls
 
-    def write(self, adr, val: Word):
+    def write(self, adr: Word, val: Word):
         '''
         Convert a Word type into 8 bytes arranged in the little endian order
         and then write it to memory
+        adr and val should both be words
         '''
         if adr is None or val is None:
             return
+        adr = adr.get_signed_value_int10()
         assert adr + 8 < self.max_adr, 'invalid mem adr: too big'
         assert adr >= self.rsp_min, 'invalid mem adr: access to read-only denied'
         for i in range(8):
@@ -85,6 +87,7 @@ class Memory:
             for adr in range(0, self.rsp_min, 8):
                 b = self._get_word(adr)
                 res[adr] = b.get_str_hex()
+
         if show_zero:
             for adr in range(self.rsp_min, self.max_adr, 8):
                 b = self._get_word(adr)
