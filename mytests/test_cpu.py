@@ -3,6 +3,15 @@ sys.path.append("./")
 from CPU import *
 from abstraction import *
 
+def run(cpu):
+    cpu.fetch_stage()
+    cpu.decode_stage()
+    cpu.execute_stage()    
+    cpu.memory_stage()
+    cpu.write_back_stage()    
+    cpu.update_PC()
+
+
 
 def get_ins_test(PC):
     nop = DataArb('0x10')
@@ -28,8 +37,9 @@ def test0():  # nop
 
 
 def test_rrmovq():
+    extern_memory = Memory([Byte('0xff')])
     def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
+        return extern_memory.get_ins(PC)
     cpu = CPU(Memory([Byte('0x00')], 0x100), get_ins=get_ins_rrmovq)
     cpu.PC = 0
     cpu.registers.write(0, Word('0xa0a6adbc709'))
@@ -157,28 +167,57 @@ def test_mrmovq():
 
 
 def test_OPq():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
+    mem = Memory([Byte('0x61'), Byte('0x33')])
+    cpu = CPU(mem, get_ins=None)
+
+    cpu.registers.write(2, Word('0x2'))
+    cpu.registers.write(3, Word('0x10'))
+
     cpu.PC = 0
     cpu.fetch_stage()
     print("after fetch:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+
     cpu.decode_stage()
     print("after decode:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+    
     cpu.execute_stage()
     print("after execute:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+    
     cpu.memory_stage()
     print("after memory:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+    
     cpu.write_back_stage()
     print("after write back:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+    
     cpu.update_PC()
     print("after update PC:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+
+
+def test_OOOOOOOP():
+    mem = Memory([Byte('0x63'), Byte('0x32')])
+    cpu = CPU(mem, get_ins=None)
+
+    cpu.registers.write(2, Word('0xff00ff'))
+    cpu.registers.write(3, Word('0xf0f0f0'))
+
+    cpu.PC = 0
+    run(cpu)
+    
+    cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+
 
 
 def test_jXX():
@@ -307,4 +346,4 @@ def test_popq():
 
 
 if __name__ == '__main__':
-    test_irmovq()
+    test_OOOOOOOP()

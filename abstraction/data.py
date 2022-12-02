@@ -38,6 +38,7 @@ class DataArb:
         # Convert decimal int to list of "binary" numbers (still decimal but
         # has an either 0 or 1 value)
         # keep the value same
+        assert x >= 0
         self._value = []
         while x > 0:
             self._value.insert(0, x % 2)
@@ -158,7 +159,7 @@ class Word(DataArb):
     def _get_inv_bits(self):
         bits = []
         for b in self._value:
-            bits.append(b)
+            bits.append(1-b)
         return bits
 
     def get_signed_value_int10(self):

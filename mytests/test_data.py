@@ -123,7 +123,7 @@ def test_ragged():
 
 
 if __name__ == '__main__':
-    test_data()
-    test_byte()
+    # test_data()
+    # test_byte()
     test_word()
     test_ragged()

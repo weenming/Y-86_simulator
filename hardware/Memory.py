@@ -63,8 +63,7 @@ class Memory:
         if icode in [0, 1, 9]:
             ins_bits = byte_0th.get_bit_ls()
         elif icode in [2, 6, 10, 11]:
-            ins_bits = byte_0th.get_bit_ls()
-            + self.mem_bytes[PC + 1].get_bit_ls()
+            ins_bits = byte_0th.get_bit_ls() + self.mem_bytes[PC + 1].get_bit_ls()
         elif icode in [3, 4, 5]:  # ir, rm, mrmovq
             val_byte_ls_le = self.mem_bytes[PC + 2: PC + 10]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
