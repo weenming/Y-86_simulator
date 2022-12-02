@@ -72,7 +72,6 @@ def test_irmovq():
         0x12), Byte(0x34), Byte(0x56), Byte(0x78), Byte(0x9a), Byte(0xbc), Byte(0xde), Byte(0xf0)])
     cpu = CPU(mem, get_ins=None)
     cpu.PC = 0
-    cpu.registers.write(0, Word('0xa0a6adbc709'))
 
     cpu.fetch_stage()
     print("\nAfter fetch:")

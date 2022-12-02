@@ -158,7 +158,7 @@ class Word(DataArb):
     def _get_inv_bits(self):
         bits = []
         for b in self._value:
-            bits.append(b)
+            bits.append(1 - b)
         return bits
 
     def get_signed_value_int10(self):
