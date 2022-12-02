@@ -10,4 +10,4 @@ Second line added with Git in VS Code
 
 Thrid line is added by grandson
 
-aaa
+git reports conflicts **after merging**
