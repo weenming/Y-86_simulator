@@ -16,9 +16,11 @@ class Registers():
             reg.print_bit_ls()
         return
 
-    def show_regs_hex(self):
+    def show_regs_hex(self, show_zero=True):
         for i in range(len(self.regs)):
-            print(f'{self.names[i]}({i}):', self.regs[i].get_str_hex())
+            if show_zero or self.regs[i].get_value_int10():
+                print(self.regs[i]._value)
+                print(f'{self.names[i]}({i}):', self.regs[i].get_str_hex())
         return
 
     def read(self, address):
