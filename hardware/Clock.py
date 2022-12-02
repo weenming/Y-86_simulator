@@ -23,7 +23,7 @@ class CondCode:
         # not tested
         assert icode in [2, 7]
         if ifun == 0:
-            return True
+            return 1
         elif ifun == 1:  # le
             # python does not have suitable bitwise not...
             return (self.SF ^ self.OF) | (self.ZF)
