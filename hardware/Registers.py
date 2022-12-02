@@ -36,7 +36,7 @@ class Registers():
 
     def write(self, address, val):
         '''
-        val should be Word type.
+         val should both be Word type.
         '''
         if val is None or address is None or address == 15:
             # skip or access no reg
