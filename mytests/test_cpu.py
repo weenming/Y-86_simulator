@@ -3,14 +3,14 @@ sys.path.append("./")
 from CPU import *
 from abstraction import *
 
+
 def run(cpu):
     cpu.fetch_stage()
     cpu.decode_stage()
-    cpu.execute_stage()    
+    cpu.execute_stage()
     cpu.memory_stage()
-    cpu.write_back_stage()    
+    cpu.write_back_stage()
     cpu.update_PC()
-
 
 
 def get_ins_test(PC):
@@ -38,6 +38,7 @@ def test0():  # nop
 
 def test_rrmovq():
     extern_memory = Memory([Byte('0xff')])
+
     def get_ins_rrmovq(PC):
         return extern_memory.get_ins(PC)
     cpu = CPU(Memory([Byte('0x00')], 0x100), get_ins=get_ins_rrmovq)
@@ -158,27 +159,16 @@ def test_rmmovq():
 
 
 def test_mrmovq():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
+    mem = Memory([Byte(0x50), Byte(0x01), Byte(
+        0x20), Byte(0x00), Byte(0x0), Byte(0x00), Byte(0x0), Byte(0x0), Byte(0x0), Byte(0x0)])  # D = 0x20
+    cpu = CPU(mem, get_ins=None)
     cpu.PC = 0
-    cpu.fetch_stage()
-    print("after fetch:")
-    cpu.show_cpu()
-    cpu.decode_stage()
-    print("after decode:")
-    cpu.show_cpu()
-    cpu.execute_stage()
-    print("after execute:")
-    cpu.show_cpu()
-    cpu.memory_stage()
-    print("after memory:")
-    cpu.show_cpu()
-    cpu.write_back_stage()
-    print("after write back:")
-    cpu.show_cpu()
-    cpu.update_PC()
-    print("after update PC:")
+    cpu.memory.write(Word(0x50), Word(0xabcdef))
+    cpu.registers.write(1, Word(0x30))  # adr to write += 0x2, adr is 0x50 now
+
+    cpu.memory.show_mem(show_ins=True, show_zero=False)
+    run(cpu)
+    cpu.registers.show_regs_hex()
     cpu.show_cpu()
 
 
@@ -199,22 +189,22 @@ def test_OPq():
     print("after decode:")
     cpu.show_cpu()
     cpu.registers.show_regs_hex()
-    
+
     cpu.execute_stage()
     print("after execute:")
     cpu.show_cpu()
     cpu.registers.show_regs_hex()
-    
+
     cpu.memory_stage()
     print("after memory:")
     cpu.show_cpu()
     cpu.registers.show_regs_hex()
-    
+
     cpu.write_back_stage()
     print("after write back:")
     cpu.show_cpu()
     cpu.registers.show_regs_hex()
-    
+
     cpu.update_PC()
     print("after update PC:")
     cpu.show_cpu()
@@ -230,10 +220,9 @@ def test_OOOOOOOP():
 
     cpu.PC = 0
     run(cpu)
-    
+
     cpu.show_cpu()
     cpu.registers.show_regs_hex()
-
 
 
 def test_jXX():
@@ -362,4 +351,4 @@ def test_popq():
 
 
 if __name__ == '__main__':
-    test_OOOOOOOP()
+    test_rmmovq()
