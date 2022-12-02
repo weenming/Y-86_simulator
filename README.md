@@ -8,5 +8,5 @@ This line is added by weenming
 
 Second line added with Git in VS Code
 
-Thrid line is added by grandson
+Third line is added by grandson
 

@@ -12,12 +12,12 @@ class ALU():
         cc_info = None
 
         if operator == '+':
-            x1 = operand1.get_value_int10()
-            x2 = operand2.get_value_int10()
+            x1 = operand1.get_signed_value_int10()
+            x2 = operand2.get_signed_value_int10()
             w = Word(x1 + x2)
         elif operator == '-':
-            x1 = operand1.get_value_int10()
-            x2 = operand2.get_value_int10()
+            x1 = operand1.get_signed_value_int10()
+            x2 = operand2.get_signed_value_int10()
             w = Word(x1 - x2)
         elif operator == '&':
             ls1 = operand1.get_bit_ls()

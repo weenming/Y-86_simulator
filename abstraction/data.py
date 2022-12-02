@@ -62,7 +62,7 @@ class DataArb:
         print(self._value)
 
     def get_value_int10(self):
-        # returns a decimal equal to the value of the data
+        # returns a unsigned decimal number equal to the value of the data
         res = 0
         for b in self._value:
             res *= 2
@@ -103,7 +103,7 @@ class DataArb:
         return True
 
     def is_zero(self):
-        if self.get_value_int10() == 0:
+        if self._get_value_int10() == 0:
             return True
         else:
             return False
@@ -161,8 +161,9 @@ class Word(DataArb):
             bits.append(b)
         return bits
 
-    def get_value_int10(self):
-        # returns a decimal equal to the value of the data
+    def get_signed_value_int10(self):
+        # returns signed decimal number
+        print(self.neg)
         if self.neg:
             res = 0
             tmp_bits = self._get_inv_bits()

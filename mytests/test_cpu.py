@@ -30,53 +30,80 @@ def test0():  # nop
 def test_rrmovq():
     def get_ins_rrmovq(PC):
         return DataArb('0x2001')
-    cpu = CPU(Memory([Byte('0x10')]), get_ins=get_ins_rrmovq)
+    cpu = CPU(Memory([Byte('0x00')], 0x100), get_ins=get_ins_rrmovq)
     cpu.PC = 0
     cpu.registers.write(0, Word('0xa0a6adbc709'))
     cpu.fetch_stage()
     print("\nAfter fetch:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.decode_stage()
     print("\nAfter decode:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.execute_stage()
     print("\nAfter execute:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.memory_stage()
     print("\nAfter memory:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.write_back_stage()
     print("\nAfter write back:")
     cpu.show_cpu()
     cpu.registers.show_regs_hex()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.update_PC()
     print("\nAfter update PC:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
 
 
 def test_irmovq():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
+    # def get_ins_rrmovq(PC):
+    #     return DataArb('0x')
+    mem = Memory([Byte(0x30), Byte(0xf1), Byte(
+        0x12), Byte(0x34), Byte(0x56), Byte(0x78), Byte(0x9a), Byte(0xbc), Byte(0xde), Byte(0xf0)])
+    cpu = CPU(mem, get_ins=None)
     cpu.PC = 0
+    cpu.registers.write(0, Word('0xa0a6adbc709'))
+
     cpu.fetch_stage()
-    print("after fetch:")
+    print("\nAfter fetch:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.decode_stage()
-    print("after decode:")
+    print("\nAfter decode:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.execute_stage()
-    print("after execute:")
+    print("\nAfter execute:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.memory_stage()
-    print("after memory:")
+    print("\nAfter memory:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.write_back_stage()
-    print("after write back:")
+    print("\nAfter write back:")
     cpu.show_cpu()
+    cpu.registers.show_regs_hex()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
+
     cpu.update_PC()
-    print("after update PC:")
+    print("\nAfter update PC:")
     cpu.show_cpu()
+    cpu.memory.show_mem(show_zero=True, show_ins=True)
 
 
 def test_rmmovq():
@@ -280,4 +307,4 @@ def test_popq():
 
 
 if __name__ == '__main__':
-    test_rrmovq()
+    test_irmovq()

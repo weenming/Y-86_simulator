@@ -27,7 +27,7 @@ class Registers():
         '''
         if address is None or address == 15:
             # skip or access no reg
-            return False
+            return Word(0)
         # maybe the exception handling need improvement
         assert 0 <= address < 15, 'invalid register address'
         return self.regs[address]
