@@ -10,7 +10,3 @@ Second line added with Git in VS Code
 
 Thrid line is added by grandson
 
-
-branch weenming
-
-test...
