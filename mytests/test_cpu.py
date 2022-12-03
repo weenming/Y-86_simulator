@@ -173,6 +173,20 @@ def test_mrmovq():
     cpu.registers.show_regs_hex()
     cpu.show_cpu()
 
+    try:
+        print('begin testing mem range')
+        mem = Memory([Byte(0x50), Byte(0x01), Byte(
+            0xf0), Byte(0x00), Byte(0x0), Byte(0x00), Byte(0x0), Byte(0x0), Byte(0x0), Byte(0x0)])  # D = 0x20
+        cpu = CPU(mem, get_ins=None)
+        cpu.PC = 0
+        cpu.memory.write(Word(0x100), Word(0xabcdef))
+        cpu.memory.show_mem(show_ins=True, show_zero=False)
+        run(cpu)
+        cpu.registers.show_regs_hex()
+        cpu.show_cpu()
+    except AssertionError:
+        print('mem error?')
+
 
 def test_OPq():
     mem = Memory([Byte('0x61'), Byte('0x33')])
@@ -353,4 +367,4 @@ def test_popq():
 
 
 if __name__ == '__main__':
-    test_rmmovq()
+    test_mrmovq()

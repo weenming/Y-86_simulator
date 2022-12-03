@@ -11,6 +11,7 @@ class Registers():
         self.regs = []
         for _ in range(15):
             self.regs.append(Word(0))
+        self.write(self.get_rsp(), rsp_val)
 
     def show_regs(self):
         for reg in self.regs:
