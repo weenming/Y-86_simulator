@@ -59,4 +59,20 @@ class ALU():
         else:
             info['SF'] = 0
         if (t.neg != a.neg) and (a.neg == b.neg):
+            info['OF'] = 1
+        else:
             info['OF'] = 0
+        return info
+
+    def _get_cc_info_log(self, a: Word, b: Word, t: Word):
+        info = {}
+        if t.is_zero():
+            info['ZF'] = 1
+        else:
+            info['ZF'] = 0
+        if t.neg:
+            info['SF'] = 1
+        else:
+            info['SF'] = 0
+        info['OF'] = 0
+        return info

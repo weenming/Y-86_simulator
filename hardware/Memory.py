@@ -13,7 +13,7 @@ class Memory:
         assert len(byte_ls) <= max_adr
         print('init mem')
 
-        # stack cannot grow into space of program code
+        # stack frame cannot grow into space of program code
         self.rsp_min = len(byte_ls) + 8 - len(byte_ls) % 8
         while len(byte_ls) < max_adr:
             byte_ls.append(Byte(0))
@@ -65,7 +65,8 @@ class Memory:
         if icode in [0, 1, 9]:
             ins_bits = byte_0th.get_bit_ls()
         elif icode in [2, 6, 10, 11]:
-            ins_bits = byte_0th.get_bit_ls() + self.mem_bytes[PC + 1].get_bit_ls()
+            ins_bits = byte_0th.get_bit_ls(
+            ) + self.mem_bytes[PC + 1].get_bit_ls()
         elif icode in [3, 4, 5]:  # ir, rm, mrmovq
             val_byte_ls_le = self.mem_bytes[PC + 2: PC + 10]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)

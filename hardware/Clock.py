@@ -16,6 +16,7 @@ class CondCode:
             return
         # update those cc_info that are not None
         if cc_info['ZF'] is not None:
+            cc_info['ZF']
             self.ZF = cc_info['ZF']
         if cc_info['SF'] is not None:
             self.SF = cc_info['SF']

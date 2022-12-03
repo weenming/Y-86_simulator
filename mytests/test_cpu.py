@@ -121,6 +121,7 @@ def test_rmmovq():
     #     return DataArb('0x')
     mem = Memory([Byte(0x40), Byte(0x01), Byte(
         0x20), Byte(0x00), Byte(0x0), Byte(0x00), Byte(0x0), Byte(0x0), Byte(0x0), Byte(0x0)])  # D = 0x20
+    # mem.write(Word(0x100), Word(0xabcdef))
     cpu = CPU(mem, get_ins=None)
     cpu.PC = 0
     cpu.registers.write(0, Word('0xabcdef'))  # val to move to mem = 0xabcdef
