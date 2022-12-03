@@ -164,7 +164,8 @@ def test_mrmovq():
     cpu = CPU(mem, get_ins=None)
     cpu.PC = 0
     cpu.memory.write(Word(0x50), Word(0xabcdef))
-    cpu.registers.write(1, Word(0x30))  # adr to write += 0x2, adr is 0x50 now
+    # adr to write += 0x30, memory adr to access is 0x50 now
+    cpu.registers.write(1, Word(0x30))
 
     cpu.memory.show_mem(show_ins=True, show_zero=False)
     run(cpu)

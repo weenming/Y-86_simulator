@@ -142,14 +142,14 @@ class Word(DataArb):
         if x < 0:
             self.neg = True
             x = -x - 1
-            while x > 0:
+            while x > 0 and len(self._value) < 64:
                 self._value.insert(0, x % 2)
                 # not sure if safe
                 x >>= 1
             self._add_zeros()
             self._value = self._get_inv_bits()
         else:
-            while x > 0:
+            while x > 0 and len(self._value) < 64:
                 self._value.insert(0, x % 2)
                 # not sure if safe
                 x >>= 1

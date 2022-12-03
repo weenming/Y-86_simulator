@@ -14,9 +14,13 @@ class CondCode:
     def set(self, cc_info):
         if cc_info is None:
             return
-        self.ZF = cc_info['ZF']
-        self.SF = cc_info['SF']
-        self.OF = cc_info['OF']
+        # update those cc_info that are not None
+        if cc_info['ZF'] is not None:
+            self.ZF = cc_info['ZF']
+        if cc_info['SF'] is not None:
+            self.SF = cc_info['SF']
+        if cc_info['OF'] is not None:
+            self.OF = cc_info['OF']
         return
 
     def is_condition(self, icode, ifun):

@@ -15,10 +15,12 @@ class ALU():
             x1 = operand1.get_signed_value_int10()
             x2 = operand2.get_signed_value_int10()
             w = Word(x1 + x2)
+            cc_info = self._get_cc_info_alg(operand1, operand2, w)
         elif operator == '-':
             x1 = operand1.get_signed_value_int10()
             x2 = operand2.get_signed_value_int10()
             w = Word(x1 - x2)
+            cc_info = self._get_cc_info_alg(operand1, operand2, w)
         elif operator == '&':
             ls1 = operand1.get_bit_ls()
             ls2 = operand2.get_bit_ls()
@@ -29,6 +31,7 @@ class ALU():
                 else:
                     ls_res.append(0)
             w = Word(ls_res)
+            cc_info = self._get_cc_info_log(operand1, operand2, w)
         elif operator == '^':
             ls1 = operand1.get_bit_ls()
             ls2 = operand2.get_bit_ls()
@@ -39,7 +42,21 @@ class ALU():
                 else:
                     ls_res.append(1)
             w = Word(ls_res)
+            cc_info = self._get_cc_info_log(operand1, operand2, w)
 
         assert w._check_validity()
 
         return w, cc_info
+
+    def _get_cc_info_alg(self, a: Word, b: Word, t: Word):
+        info = {}
+        if t.is_zero():
+            info['ZF'] = 1
+        else:
+            info['ZF'] = 0
+        if t.neg:
+            info['SF'] = 1
+        else:
+            info['SF'] = 0
+        if (t.neg != a.neg) and (a.neg == b.neg):
+            info['OF'] = 0
