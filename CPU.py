@@ -95,33 +95,34 @@ class CPU():
 
     def show_cpu(self):
         print('ins name:', self.instruct_mem.get_instruction_name())
-        if self.valA is not None:
-            print('valA:', self.valA.get_str_hex())
-        else:
-            print('valA: None')
+        # if self.valA is not None:
+        #     print('valA:', self.valA.get_str_hex())
+        # else:
+        #     print('valA: None')
 
-        if self.valB is not None:
-            print('valB:', self.valB.get_str_hex())
-        else:
-            print('valB: None')
+        # if self.valB is not None:
+        #     print('valB:', self.valB.get_str_hex())
+        # else:
+        #     print('valB: None')
 
-        if self.valC is not None:
-            print('valC:', self.valC.get_str_hex())
-        else:
-            print('valC: None')
+        # if self.valC is not None:
+        #     print('valC:', self.valC.get_str_hex())
+        # else:
+        #     print('valC: None')
 
-        if self.valE is not None:
-            print('valE:', self.valE.get_str_hex())
-        else:
-            print('valE: None')
+        # if self.valE is not None:
+        #     print('valE:', self.valE.get_str_hex())
+        # else:
+        #     print('valE: None')
 
-        if self.valM is not None:
-            print('valM:', self.valM.get_str_hex())
-        else:
-            print('valM: None')
+        # if self.valM is not None:
+        #     print('valM:', self.valM.get_str_hex())
+        # else:
+        #     print('valM: None')
 
-        print('valP:', self.valP)
-        print('rA:', self.rA)
-        print('rB:', self.rB)
+        # print('valP:', self.valP)
+        # print('rA:', self.rA)
+        # print('rB:', self.rB)
+
         print('PC:', self.PC)
         self.cond_code.show()

@@ -6,7 +6,8 @@ from abstraction import *
 
 class Registers():
     def __init__(self):
-        self.names = ['rax', 'rbx'] + ['todo'] * 13
+        self.names = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi', 
+                      'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14']
         self.regs = []
         for _ in range(15):
             self.regs.append(Word(0))

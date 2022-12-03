@@ -49,6 +49,7 @@ class ALU():
         return w, cc_info
 
     def _get_cc_info_alg(self, a: Word, b: Word, t: Word):
+        print(a.neg, b.neg, t.neg)
         info = {}
         if t.is_zero():
             info['ZF'] = 1
