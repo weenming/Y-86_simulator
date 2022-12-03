@@ -2,6 +2,7 @@ import sys
 sys.path.append("./")
 
 from abstraction import *
+import error
 
 
 class Memory:
@@ -21,14 +22,18 @@ class Memory:
         self.max_adr = max_adr
         return
 
-    def read(self, adr):
+    def read(self, adr: Word):
         '''
         Returns a Word type: red EIGHT BYTES from adr, and convert little endian
         data into Word type (big endian, I think)
         '''
         if adr is None:
             return Word(0)
-        assert adr >= 0 and adr + 8 < self.max_adr, 'invalid mem adr when reading'
+
+        adr = adr.get_signed_value_int10()
+        if adr >= 0 and adr + 8 < self.max_adr:  # 'invalid mem adr when reading'
+            raise error.AddressError
+
         # be: big endian; le: little endian
         byte_ls_le = self.mem_bytes[adr: adr + 8]
         bit_ls_be = self._reverse_byte_to_bit(byte_ls_le)
@@ -51,9 +56,13 @@ class Memory:
         '''
         if adr is None or val is None:
             return
+
         adr = adr.get_signed_value_int10()
-        assert adr + 8 < self.max_adr, 'invalid mem adr: too big'
-        assert adr >= self.rsp_min, 'invalid mem adr: access to read-only denied'
+        if adr + 8 < self.max_adr:  # 'invalid mem adr: too big'
+            raise error.AddressError
+        if adr >= self.rsp_min:  # 'invalid mem adr: access to read-only denied'
+            raise error.AddressError
+
         for i in range(8):
             byte = val.get_nth_byte(7 - i)
             self.mem_bytes[adr + i] = byte

@@ -20,7 +20,7 @@ class CPU():
         self.stat = Stat()
         # need to read memory (for programs) from external file
         self.memory = mem
-        self.registers = Registers()
+        self.registers = Registers(Word(mem.max_adr))
         # 'artificially' divide instruction men and run-time mem
         self.instruct_mem = InstructMem()
         self.get_ins = get_ins
