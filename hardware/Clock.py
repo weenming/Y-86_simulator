@@ -51,4 +51,12 @@ class CondCode:
 
 class Stat():
     def __init__(self):
+        self.val = 1
+        self.name_ls = ['AOK', 'HLT', 'ADR', 'INS']
         return
+
+    def set(self, val):
+        self.val = val
+
+    def get_name(self):
+        return self.name_ls[self.val - 1]

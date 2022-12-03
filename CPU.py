@@ -29,6 +29,21 @@ class CPU():
         if get_ins == None:  # default: get instructions from memory
             self.get_ins = self.memory.get_ins
 
+    def cycle(self):
+        try:
+            self.fetch_stage()
+            self.decode_stage()
+            self.execute_stage()
+            self.memory_stage()
+            self.write_back_stage()
+            self.update_PC()
+        except error.Halt:
+            self.stat.set(2)
+        except error.AddressError:
+            self.stat.set(3)
+        except error.InstructionError:
+            self.stat.set(4)
+
     def fetch_stage(self):
         # Whether or not get valC
         ins = self.get_ins(self.PC)
@@ -40,7 +55,8 @@ class CPU():
 
         # rA and rB are the ADDRESSES of the registers and they are INTs!!!
         self.rA, self.rB = self.instruct_mem.get_reg_address()
-        # given the current instruction, calculate the next PC
+        # given the current instruction, calculate the next PC,
+        # valP is INT!!!!
         self.valP = self.PC + self.instruct_mem.calc_valP()
 
         self.valC = self.instruct_mem.get_valC()

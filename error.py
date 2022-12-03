@@ -11,5 +11,5 @@ class Halt(Error):
     pass
 
 
-class INstructionError(Error):
+class InstructionError(Error):
     pass
