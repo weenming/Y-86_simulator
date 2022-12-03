@@ -121,18 +121,14 @@ class Word(DataArb):
         super().__init__(s)
         self._add_zeros()
         assert self._check_validity(), 'bad input Word!'
-        if self._value[0] == 1:
-            self.neg = True
+        self._update_neg()
 
     def _add_zeros(self):
         for _ in range(64 - len(self._value)):
             self._value.insert(0, 0)
 
     def _check_validity(self):
-        if self._value is not None and self.get_bit_len() == 64:
-            return True
-        else:
-            return False
+        return self._value is not None and self.get_bit_len() == 64
 
     def _load_int10(self, x):
         # Convert decimal int to list of "binary" numbers (still decimal but
@@ -140,7 +136,6 @@ class Word(DataArb):
         # keep the value same
         self._value = []
         if x < 0:
-            self.neg = True
             x = -x - 1
             while x > 0 and len(self._value) < 64:
                 self._value.insert(0, x % 2)
@@ -154,6 +149,7 @@ class Word(DataArb):
                 # not sure if safe
                 x >>= 1
             self._add_zeros()
+        self._update_neg()
         return True
 
     def _get_inv_bits(self):
@@ -178,6 +174,9 @@ class Word(DataArb):
                 res *= 2
                 res += b
         return res
+
+    def _update_neg(self):
+        self.neg = (self._value[0] == 1)
 
 
 class Byte(DataArb):
