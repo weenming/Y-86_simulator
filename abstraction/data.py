@@ -160,7 +160,7 @@ class Word(DataArb):
 
     def get_signed_value_int10(self):
         # returns signed decimal number
-        print(self.neg)
+        # print(self.neg)
         if self.neg:
             res = 0
             tmp_bits = self._get_inv_bits()

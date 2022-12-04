@@ -31,7 +31,7 @@ class Memory:
             return Word(0)
 
         adr = adr.get_signed_value_int10()
-        if adr >= 0 and adr + 8 < self.max_adr:  # 'invalid mem adr when reading'
+        if adr < 0 or adr + 8 > self.max_adr:  # 'invalid mem adr when reading'
             raise error.AddressError
 
         # be: big endian; le: little endian
@@ -58,9 +58,9 @@ class Memory:
             return
 
         adr = adr.get_signed_value_int10()
-        if adr + 8 < self.max_adr:  # 'invalid mem adr: too big'
+        if adr + 8 > self.max_adr:  # 'invalid mem adr: too big'
             raise error.AddressError
-        if adr >= self.rsp_min:  # 'invalid mem adr: access to read-only denied'
+        if adr < self.rsp_min:  # 'invalid mem adr: access to read-only denied'
             raise error.AddressError
 
         for i in range(8):
@@ -70,6 +70,9 @@ class Memory:
 
     def get_ins(self, PC):
         byte_0th = self.mem_bytes[PC]
+        if PC >= self.rsp_min:
+            raise error.AddressError
+
         icode = byte_0th.get_bits(0, 4).get_value_int10()
         if icode in [0, 1, 9]:
             ins_bits = byte_0th.get_bit_ls()

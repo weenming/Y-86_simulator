@@ -33,7 +33,7 @@ class InstructMem():
 
     def get_instruction_name(self):
         names = ['halt', 'nop', 'rrmovq', 'irmovq', 'rmmovq', 'mrmovq',
-                 'OPq', 'jXX', 'cmovXX', 'call', 'ret', 'pushq', 'popq']
+                 'OPq', 'jXX', 'call', 'ret', 'pushq', 'popq']
         return names[self.icode]
 
     def get_valC(self):
@@ -59,3 +59,5 @@ class InstructMem():
 
     def calc_valP(self):
         return self.len
+
+

@@ -10,7 +10,8 @@ class ALU():
 
     def op64(self, operator, operand1, operand2):
         cc_info = None
-
+        if operator is None:
+            return None, None
         if operator == '+':
             x1 = operand1.get_signed_value_int10()
             x2 = operand2.get_signed_value_int10()
@@ -49,7 +50,7 @@ class ALU():
         return w, cc_info
 
     def _get_cc_info_alg(self, a: Word, b: Word, t: Word):
-        print(a.neg, b.neg, t.neg)
+        # print(a.neg, b.neg, t.neg)
         info = {}
         if t.is_zero():
             info['ZF'] = 1

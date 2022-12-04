@@ -5,8 +5,8 @@ from abstraction import *
 
 
 class Registers():
-    def __init__(self):
-        self.names = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi', 
+    def __init__(self, rsp_val=Word(0)):
+        self.names = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi',
                       'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14']
         self.regs = []
         for _ in range(15):
@@ -48,3 +48,6 @@ class Registers():
 
     def get_rsp(self):
         return 4
+
+    def show_rsp(self):
+        return self.regs[self.get_rsp()].get_str_hex()
