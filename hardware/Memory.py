@@ -77,20 +77,27 @@ class Memory:
         if icode in [0, 1, 9]:
             ins_bits = byte_0th.get_bit_ls()
         elif icode in [2, 6, 10, 11]:
+            if PC + 1 >= self.rsp_min:
+                raise error.AddressError
             ins_bits = byte_0th.get_bit_ls(
             ) + self.mem_bytes[PC + 1].get_bit_ls()
         elif icode in [3, 4, 5]:  # ir, rm, mrmovq
+            if PC + 9 >= self.rap_min:
+                raise error.AddressError
             val_byte_ls_le = self.mem_bytes[PC + 2: PC + 10]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
             byte_1th_ls = self.mem_bytes[PC + 1]
             # icode, ifun | rA, rB | V(D) - big endian
             ins_bits = byte_0th.get_bit_ls() + byte_1th_ls.get_bit_ls() + val_bit_ls_be
         elif icode in [7, 8]:  # jXX, call
+            if PC + 8 >= self.rsp_min:
+                raise error.AddressError
             val_byte_ls_le = self.mem_bytes[PC + 1: PC + 9]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
             # icode, ifun | Dest - big endian
             ins_bits = byte_0th.get_bit_ls() + val_bit_ls_be
-
+        else:
+            raise error.InstructionError
         return DataArb(ins_bits)
 
     def show_mem(self, show_ins=False, show_zero=False):

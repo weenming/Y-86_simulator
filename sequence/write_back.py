@@ -2,8 +2,13 @@ from abstraction import *
 
 
 def select_write_back(cpu):
-    if cpu.icode in [2, 3, 6]:
+    if cpu.icode in [3, 6]:
         return cpu.rB, cpu.valE
+    elif cpu.icode == 2:
+        if cpu.ifun == 0 or cpu.cnd:
+            return cpu.rB, cpu.valE
+        else:
+            return None, None
     elif cpu.icode == 5:  # mrmovq
         return cpu.rA, cpu.valM
     elif cpu.icode in [8, 9, 10, 11]:

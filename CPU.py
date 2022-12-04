@@ -30,6 +30,10 @@ class CPU():
         print('CPU init finished')
 
     def cycle(self):
+        # when trying to run the cpu with a error stat code, raise error.
+        if not self.stat.is_ok():
+            print('bad stat code, throwing error')
+            self.stat.raise_error()
         try:
             self.fetch_stage()
             self.decode_stage()
@@ -37,13 +41,16 @@ class CPU():
             self.memory_stage()
             self.write_back_stage()
             self.update_PC()
+            return True
         except error.Halt:
-            self.stat.set(2)
+            self.stat.set(2, self)
         except error.AddressError:
             print('address out of range!')
-            self.stat.set(3)
+            self.stat.set(3, self)
         except error.InstructionError:
-            self.stat.set(4)
+            print('instruction error:')
+            self.stat.set(4, self)
+        return False
 
     def fetch_stage(self):
         # Whether or not get valC

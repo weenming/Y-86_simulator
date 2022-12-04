@@ -1,7 +1,7 @@
 import sys
 sys.path.append("./")
 # If trying to import CPU here, circular importing problem occurs.
-
+import error
 
 class CondCode:
     def __init__(self):
@@ -28,20 +28,24 @@ class CondCode:
         # not tested
         assert icode in [2, 7]
         if ifun == 0:
-            return 1
+            res = 1
         elif ifun == 1:  # le
             # python does not have suitable bitwise not...
-            return (self.SF ^ self.OF) | (self.ZF)
+            res = (self.SF ^ self.OF) | (self.ZF)
         elif ifun == 2:  # l
-            return self.SF ^ self.OF
+            res = self.SF ^ self.OF
         elif ifun == 3:  # e
-            return self.ZF
+            res = self.ZF
         elif ifun == 4:  # ne
-            return ~self.ZF
+            res = ~self.ZF
         elif ifun == 5:  # ge
-            return ~(self.SF ^ self.OF)
+            res = ~(self.SF ^ self.OF)
         elif ifun == 6:  # g
-            return ~(self.SF ^ self.OF) & ~self.ZF
+            res = ~(self.SF ^ self.OF) & ~self.ZF
+        if res == 0:
+            return False
+        else:
+            return True
 
     def show(self):
         print('ZF:', self.ZF)
@@ -55,8 +59,28 @@ class Stat():
         self.name_ls = ['AOK', 'HLT', 'ADR', 'INS']
         return
 
-    def set(self, val):
+    def set(self, val, cpu):
         self.val = val
+        print('cpu status before termination:')
+        cpu.show_cpu()
+        print(cpu.stat.name_ls[val - 1])
+
 
     def get_name(self):
         return self.name_ls[self.val - 1]
+
+    def is_ok(self):
+        if self.val == 1:
+            return True
+        else:
+            return False
+
+    def raise_error(self):
+        if self.val == 2:
+            raise error.Halt
+        elif self.val == 3:
+            raise error.AddressError
+        elif self.val == 4:
+            raise error.InstructionError
+        else:
+            print('STAT: raise error: should not run here')
