@@ -25,7 +25,11 @@ class CondCode:
         return
 
     def is_condition(self, icode, ifun):
-        # not tested
+        # Notice: did not specify the length of the number, so 
+        # ~ does not behave properly. For example, ~1 = -2 but 
+        # In our case, cc is 1-bit in length and thus -2 overflows.
+        # (should be 0)
+        # We are using 1 - instead
         assert icode in [2, 7]
         if ifun == 0:
             res = 1
@@ -35,23 +39,30 @@ class CondCode:
         elif ifun == 2:  # l
             res = self.SF ^ self.OF
         elif ifun == 3:  # e
-            res = self.ZF
+            res = 1 - self.ZF
         elif ifun == 4:  # ne
-            res = ~self.ZF
+            res = 1 - self.ZF
         elif ifun == 5:  # ge
-            res = ~(self.SF ^ self.OF)
+            res = 1 - (self.SF ^ self.OF)
         elif ifun == 6:  # g
-            res = ~(self.SF ^ self.OF) & ~self.ZF
+            res = (1 - (self.SF ^ self.OF)) & (1 - self.ZF)
+            print(res)
         if res == 0:
-            return False
+            return 0
         else:
-            return True
+            return 1
 
     def show(self):
         print('ZF:', self.ZF)
         print('SF:', self.SF)
         print('OF:', self.OF)
 
+    def get_CC_dict(self):
+        d = {}
+        d['ZF'] =  self.ZF
+        d['SF'] =  self.SF
+        d['OF'] =  self.OF
+        return d
 
 class Stat():
     def __init__(self):

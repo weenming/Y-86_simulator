@@ -33,6 +33,7 @@ class Registers():
             return Word(0)
         # maybe the exception handling need improvement
         assert 0 <= address < 15, 'invalid register address'
+        assert isinstance(self.regs[address], Word), 'not initialized reg!'
         return self.regs[address]
 
     def write(self, address, val):
@@ -51,3 +52,9 @@ class Registers():
 
     def show_rsp(self):
         return self.regs[self.get_rsp()].get_str_hex()
+
+    def get_reg_dict(self):
+        d = {}
+        for name, reg in zip(self.names, self.regs):
+            d[name] = reg.get_signed_value_int10()
+        return d

@@ -6,7 +6,7 @@ import error
 
 
 class Memory:
-    def __init__(self, byte_ls, max_adr=0x100):
+    def __init__(self, byte_ls, max_adr=0x200):
         '''
         stack frame: subtracted starting from 0x100
         ins_mem: added starting from 0x0
@@ -82,7 +82,7 @@ class Memory:
             ins_bits = byte_0th.get_bit_ls(
             ) + self.mem_bytes[PC + 1].get_bit_ls()
         elif icode in [3, 4, 5]:  # ir, rm, mrmovq
-            if PC + 9 >= self.rap_min:
+            if PC + 9 >= self.rsp_min:
                 raise error.AddressError
             val_byte_ls_le = self.mem_bytes[PC + 2: PC + 10]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
@@ -105,19 +105,30 @@ class Memory:
         if show_ins:
             for adr in range(0, self.rsp_min, 8):
                 b = self._get_word(adr)
-                res[adr] = b.get_str_hex()
+                res[hex(adr)] = b.get_str_hex()
 
         if show_zero:
             for adr in range(self.rsp_min, self.max_adr, 8):
                 b = self._get_word(adr)
-                res[adr] = b.get_str_hex()
+                res[hex(adr)] = b.get_str_hex()
         else:
             for adr in range(self.rsp_min, self.max_adr, 8):
                 b = self._get_word(adr)
                 if not b.is_zero():
-                    res[adr] = b.get_str_hex()
-
+                    res[hex(adr)] = b.get_str_hex()
         print(res)
+
+    def get_mem_dict(self):
+        # non zero 8-byte aligned blocks, little endian, signed decimal
+        dic = {}
+        for adr in range(0, self.max_adr, 8):
+            bytes8 = self.mem_bytes[adr: adr + 8]
+            bits = self._reverse_byte_to_bit(bytes8)
+            num = Word(bits).get_signed_value_int10()
+            if num != 0:
+                dic[str(adr)] = num
+        return dic
+
 
     def _get_word(self, adr):
         assert adr < self.max_adr and adr >= 0

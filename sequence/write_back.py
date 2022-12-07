@@ -5,7 +5,7 @@ def select_write_back(cpu):
     if cpu.icode in [3, 6]:
         return cpu.rB, cpu.valE
     elif cpu.icode == 2:
-        if cpu.ifun == 0 or cpu.cnd:
+        if cpu.ifun == 0 or cpu.cnd == 1:
             return cpu.rB, cpu.valE
         else:
             return None, None
