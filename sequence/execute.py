@@ -34,11 +34,11 @@ def select_operation(cpu):
         operator = '+'
         op1 = cpu.valB
         op2 = cpu.valC
-    elif icode == 10:  # pushq
+    elif icode in [10, 8]:  # pushq or call
         operator = '+'
         op1 = cpu.valB
         op2 = Word(-8)
-    elif icode == 1:  # popq
+    elif icode in [11, 9]:  # popq or ret
         operator = '+'
         op1 = cpu.valB
         op2 = Word(8)

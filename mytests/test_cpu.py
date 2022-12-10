@@ -184,7 +184,7 @@ def test_mrmovq():
         run(cpu)
         cpu.registers.show_regs_hex()
         cpu.show_cpu()
-    except AssertionError:
+    except error.AddressError:
         print('mem error?')
 
 
@@ -242,129 +242,138 @@ def test_OOOOOOOP():
 
 
 def test_jXX():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
+    mem = Memory([Byte(0x70), Byte(0x0a), Byte(
+        0x00), Byte(0x00), Byte(0x00), Byte(0x00), Byte(0x00), Byte(0x00), Byte(0x00), Byte(0x0)])  # D = 0x20
+    cpu = CPU(mem, get_ins=None)
     cpu.PC = 0
-    cpu.fetch_stage()
-    print("after fetch:")
+    # cpu.memory.write(Word(0x50), Word(0xabcdef))
+    # adr to write += 0x30, memory adr to access is 0x50 now
+    # cpu.registers.write(1, Word(0x30))
+
+    cpu.memory.show_mem(show_ins=True, show_zero=False)
+    run(cpu)
+    # cpu.registers.show_regs_hex()
+    cpu.show_cpu(show_values=True)
+    try:
+        run(cpu)
+    except error.Halt:
+        print('Halt!')
+
+def test_jne():
+    mem = Memory([Byte(0x74), Byte(0x10)]+ [Byte(
+        0x00)] * 7 + [Byte(0xff)] * 7 + [Byte(0x00)] + [Byte(0xff)] * 0x10)  # D = 0x20
+    cpu = CPU(mem, get_ins=None)
+    cpu.PC = 0
+    # cpu.memory.write(Word(0x50), Word(0xabcdef))
+    # adr to write += 0x30, memory adr to access is 0x50 now
+    # cpu.registers.write(1, Word(0x30))
+
+    cpu.memory.show_mem(show_ins=True, show_zero=False)
+    cpu.cond_code.set({'ZF': 0, 'SF': None, 'OF': None})
+    cpu.cycle()
+    # cpu.registers.show_regs_hex()
+    cpu.show_cpu(show_values=True)
+    print('\n')
+    
+    cpu.cycle()
     cpu.show_cpu()
-    cpu.decode_stage()
-    print("after decode:")
-    cpu.show_cpu()
-    cpu.execute_stage()
-    print("after execute:")
-    cpu.show_cpu()
-    cpu.memory_stage()
-    print("after memory:")
-    cpu.show_cpu()
-    cpu.write_back_stage()
-    print("after write back:")
-    cpu.show_cpu()
-    cpu.update_PC()
-    print("after update PC:")
-    cpu.show_cpu()
+    return
+
+def test_jle():
+    return
+
+def test_jge():
+    return
 
 
 def test_call():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
-    cpu.PC = 0
-    cpu.fetch_stage()
-    print("after fetch:")
-    cpu.show_cpu()
-    cpu.decode_stage()
-    print("after decode:")
-    cpu.show_cpu()
-    cpu.execute_stage()
-    print("after execute:")
-    cpu.show_cpu()
-    cpu.memory_stage()
-    print("after memory:")
-    cpu.show_cpu()
-    cpu.write_back_stage()
-    print("after write back:")
-    cpu.show_cpu()
-    cpu.update_PC()
-    print("after update PC:")
-    cpu.show_cpu()
+    mem = Memory([Byte(0x00)] * 0x10 + [Byte(0x80)] +
+                 [Byte(0x10)] + [Byte(0x00)] * 7)
+    cpu = CPU(mem=mem)
+    # print(cpu.memory.max_adr)
+    cpu.PC = 0x10
+    for _ in range(3):
+        cpu.cycle()
+        cpu.show_cpu(show_regs=True, show_values=True)
+        cpu.memory.show_mem(show_ins=True, show_zero=False)
+        print('\n')
 
 
 def test_ret():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
-    cpu.PC = 0
-    cpu.fetch_stage()
-    print("after fetch:")
-    cpu.show_cpu()
-    cpu.decode_stage()
-    print("after decode:")
-    cpu.show_cpu()
-    cpu.execute_stage()
-    print("after execute:")
-    cpu.show_cpu()
-    cpu.memory_stage()
-    print("after memory:")
-    cpu.show_cpu()
-    cpu.write_back_stage()
-    print("after write back:")
-    cpu.show_cpu()
-    cpu.update_PC()
-    print("after update PC:")
-    cpu.show_cpu()
+    '''
+    the instructions are:
+    0x10    call 0x1e 
+    0x19    halt
+    0x1a    invalid instruction
+    0x1b    invalid instruction
+    0x1c    invalid instruction
+    0x1d    ret
 
+    '''
+    mem = Memory( [Byte(0xff)] * 0x10 + [Byte(0x80)] +
+                 [Byte(0x1d)] + [Byte(0x00)] * 7 + [Byte(0x00)] + [Byte(0xff)] * 0x3  + [Byte(0x90)])
+    cpu = CPU(mem=mem)
+    # print(cpu.memory.max_adr)
+    cpu.PC = 0x10
+    print('call')
+    cpu.cycle()
+    cpu.show_cpu(show_regs=True, show_values=True)
+    cpu.memory.show_mem(show_ins=True, show_zero=True)
+    print('\n')
+    print('ret')
+    cpu.cycle()
+    cpu.show_cpu(show_regs=True, show_values=True)
+    cpu.memory.show_mem(show_ins=True, show_zero=True)
+    print('\n')
+
+    while True:
+        if cpu.cycle():
+            cpu.show_cpu(show_regs=True, show_values=True)
+            print('\n')
+        else:
+            print('rsp (should be 0x100):', cpu.registers.show_rsp())
+            print('rip (should be 0x19):', cpu.PC)
+            print('Halt, correct!')
+            break
 
 def test_pushq():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
-    cpu.PC = 0
-    cpu.fetch_stage()
-    print("after fetch:")
-    cpu.show_cpu()
-    cpu.decode_stage()
-    print("after decode:")
-    cpu.show_cpu()
-    cpu.execute_stage()
-    print("after execute:")
-    cpu.show_cpu()
-    cpu.memory_stage()
-    print("after memory:")
-    cpu.show_cpu()
-    cpu.write_back_stage()
-    print("after write back:")
-    cpu.show_cpu()
-    cpu.update_PC()
-    print("after update PC:")
-    cpu.show_cpu()
+    mem = Memory([Byte(0x00)] * 0x10 + [Byte(0xa0)] +
+                 [Byte(0x0f)] + [Byte(0xff)] * 7)
+    cpu = CPU(mem=mem)
+    print('rsp:', cpu.registers.show_rsp())
 
+    # print(cpu.memory.max_adr)
+    cpu.registers.write(0, Word(0xabcdef))
+    cpu.PC = 0x10
+    cpu.cycle()
+    cpu.show_cpu(show_regs=True, show_values=True)
+    cpu.memory.show_mem(show_ins=True, show_zero=False)
+    print('rsp:', cpu.registers.show_rsp())
+    print('\n')
+    
 
 def test_popq():
-    def get_ins_rrmovq(PC):
-        return DataArb('0x2001')
-    cpu = CPU(get_ins=get_ins_rrmovq)
-    cpu.PC = 0
-    cpu.fetch_stage()
-    print("after fetch:")
-    cpu.show_cpu()
-    cpu.decode_stage()
-    print("after decode:")
-    cpu.show_cpu()
-    cpu.execute_stage()
-    print("after execute:")
-    cpu.show_cpu()
-    cpu.memory_stage()
-    print("after memory:")
-    cpu.show_cpu()
-    cpu.write_back_stage()
-    print("after write back:")
-    cpu.show_cpu()
-    cpu.update_PC()
-    print("after update PC:")
-    cpu.show_cpu()
+    mem = Memory([Byte(0x00)] * 0x10 + [Byte(0xa0)] +
+                 [Byte(0x0f)] + [Byte(0xb0), Byte(0x1f)])
+    cpu = CPU(mem=mem)
+
+    print('rsp:', cpu.registers.show_rsp())
+    cpu.registers.write(0, Word(0xabcdef))
+    cpu.PC = 0x10
+
+    print('push:')
+    cpu.cycle()
+    print('pop:')
+    cpu.cycle()
+
+    cpu.show_cpu(show_regs=True, show_values=True)
+    cpu.memory.show_mem(show_ins=True, show_zero=False)
+    print('rsp:', cpu.registers.show_rsp())
+    print('\n')
+
+    print('halt:')
+    cpu.cycle()
 
 
 if __name__ == '__main__':
-    test_mrmovq()
+    test_jne()

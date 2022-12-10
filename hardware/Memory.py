@@ -6,7 +6,7 @@ import error
 
 
 class Memory:
-    def __init__(self, byte_ls, max_adr=0x100):
+    def __init__(self, byte_ls, max_adr=0x200):
         '''
         stack frame: subtracted starting from 0x100
         ins_mem: added starting from 0x0
@@ -31,7 +31,7 @@ class Memory:
             return Word(0)
 
         adr = adr.get_signed_value_int10()
-        if adr >= 0 and adr + 8 < self.max_adr:  # 'invalid mem adr when reading'
+        if adr < 0 or adr + 8 > self.max_adr:  # 'invalid mem adr when reading'
             raise error.AddressError
 
         # be: big endian; le: little endian
@@ -58,9 +58,9 @@ class Memory:
             return
 
         adr = adr.get_signed_value_int10()
-        if adr + 8 < self.max_adr:  # 'invalid mem adr: too big'
+        if adr + 8 > self.max_adr:  # 'invalid mem adr: too big'
             raise error.AddressError
-        if adr >= self.rsp_min:  # 'invalid mem adr: access to read-only denied'
+        if adr < self.rsp_min:  # 'invalid mem adr: access to read-only denied'
             raise error.AddressError
 
         for i in range(8):
@@ -70,24 +70,34 @@ class Memory:
 
     def get_ins(self, PC):
         byte_0th = self.mem_bytes[PC]
+        if PC >= self.rsp_min:
+            raise error.AddressError
+
         icode = byte_0th.get_bits(0, 4).get_value_int10()
         if icode in [0, 1, 9]:
             ins_bits = byte_0th.get_bit_ls()
         elif icode in [2, 6, 10, 11]:
+            if PC + 1 >= self.rsp_min:
+                raise error.AddressError
             ins_bits = byte_0th.get_bit_ls(
             ) + self.mem_bytes[PC + 1].get_bit_ls()
         elif icode in [3, 4, 5]:  # ir, rm, mrmovq
+            if PC + 9 >= self.rsp_min:
+                raise error.AddressError
             val_byte_ls_le = self.mem_bytes[PC + 2: PC + 10]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
             byte_1th_ls = self.mem_bytes[PC + 1]
             # icode, ifun | rA, rB | V(D) - big endian
             ins_bits = byte_0th.get_bit_ls() + byte_1th_ls.get_bit_ls() + val_bit_ls_be
         elif icode in [7, 8]:  # jXX, call
+            if PC + 8 >= self.rsp_min:
+                raise error.AddressError
             val_byte_ls_le = self.mem_bytes[PC + 1: PC + 9]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
             # icode, ifun | Dest - big endian
             ins_bits = byte_0th.get_bit_ls() + val_bit_ls_be
-
+        else:
+            raise error.InstructionError
         return DataArb(ins_bits)
 
     def show_mem(self, show_ins=False, show_zero=False):
@@ -95,19 +105,30 @@ class Memory:
         if show_ins:
             for adr in range(0, self.rsp_min, 8):
                 b = self._get_word(adr)
-                res[adr] = b.get_str_hex()
+                res[hex(adr)] = b.get_str_hex()
 
         if show_zero:
             for adr in range(self.rsp_min, self.max_adr, 8):
                 b = self._get_word(adr)
-                res[adr] = b.get_str_hex()
+                res[hex(adr)] = b.get_str_hex()
         else:
             for adr in range(self.rsp_min, self.max_adr, 8):
                 b = self._get_word(adr)
                 if not b.is_zero():
-                    res[adr] = b.get_str_hex()
-
+                    res[hex(adr)] = b.get_str_hex()
         print(res)
+
+    def get_mem_dict(self):
+        # non zero 8-byte aligned blocks, little endian, signed decimal
+        dic = {}
+        for adr in range(0, self.max_adr, 8):
+            bytes8 = self.mem_bytes[adr: adr + 8]
+            bits = self._reverse_byte_to_bit(bytes8)
+            num = Word(bits).get_signed_value_int10()
+            if num != 0:
+                dic[str(adr)] = num
+        return dic
+
 
     def _get_word(self, adr):
         assert adr < self.max_adr and adr >= 0

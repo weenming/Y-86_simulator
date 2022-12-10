@@ -2,7 +2,6 @@ from hardware import *
 from abstraction import *
 from sequence import *
 import error
-print('importing cpu')
 
 
 class CPU():
@@ -28,11 +27,36 @@ class CPU():
         self._clear_tmp()
         if get_ins == None:  # default: get instructions from memory
             self.get_ins = self.memory.get_ins
+        print('CPU init finished')
+
+    def cycle(self):
+        # when trying to run the cpu with a error stat code, raise error.
+        if not self.stat.is_ok():
+            print('bad stat code, throwing error')
+            self.stat.raise_error()
+        try:
+            self.fetch_stage()
+            self.decode_stage()
+            self.execute_stage()
+            self.memory_stage()
+            self.write_back_stage()
+            self.update_PC()
+            return True
+        except error.Halt:
+            self.stat.set(2, self)
+        except error.AddressError:
+            print('address out of range!')
+            self.stat.set(3, self)
+        except error.InstructionError:
+            print('instruction error:')
+            self.stat.set(4, self)
+        return False
 
     def fetch_stage(self):
         # Whether or not get valC
         ins = self.get_ins(self.PC)
         self.icode, self.ifun = self.instruct_mem.update(ins)
+        
         if self.icode == 0:
             raise error.Halt
         # get icode and ifun internally
@@ -40,7 +64,8 @@ class CPU():
 
         # rA and rB are the ADDRESSES of the registers and they are INTs!!!
         self.rA, self.rB = self.instruct_mem.get_reg_address()
-        # given the current instruction, calculate the next PC
+        # given the current instruction, calculate the next PC,
+        # valP is INT!!!!
         self.valP = self.PC + self.instruct_mem.calc_valP()
 
         self.valC = self.instruct_mem.get_valC()
@@ -93,36 +118,42 @@ class CPU():
         self.valM = None
         # ...
 
-    def show_cpu(self):
+    def show_cpu(self, show_values=False, show_regs=False):
         print('ins name:', self.instruct_mem.get_instruction_name())
-        # if self.valA is not None:
-        #     print('valA:', self.valA.get_str_hex())
-        # else:
-        #     print('valA: None')
+        if show_values:
+            if self.valA is not None:
+                print('valA:', self.valA.get_str_hex())
+            else:
+                print('valA: None')
 
-        # if self.valB is not None:
-        #     print('valB:', self.valB.get_str_hex())
-        # else:
-        #     print('valB: None')
+            if self.valB is not None:
+                print('valB:', self.valB.get_str_hex())
+            else:
+                print('valB: None')
 
-        # if self.valC is not None:
-        #     print('valC:', self.valC.get_str_hex())
-        # else:
-        #     print('valC: None')
+            if self.valC is not None:
+                print('valC:', self.valC.get_str_hex())
+            else:
+                print('valC: None')
 
-        # if self.valE is not None:
-        #     print('valE:', self.valE.get_str_hex())
-        # else:
-        #     print('valE: None')
+            if self.valE is not None:
+                print('valE:', self.valE.get_str_hex())
+            else:
+                print('valE: None')
 
-        # if self.valM is not None:
-        #     print('valM:', self.valM.get_str_hex())
-        # else:
-        #     print('valM: None')
+            if self.valM is not None:
+                print('valM:', self.valM.get_str_hex())
+            else:
+                print('valM: None')
 
-        # print('valP:', self.valP)
-        # print('rA:', self.rA)
-        # print('rB:', self.rB)
+            print('valP:', self.valP)
+            print('rA:', self.rA)
+            print('rB:', self.rB)
 
-        print('PC:', self.PC)
+        print('PC:', hex(self.PC))
+
+        if show_regs:
+            self.registers.show_regs_hex(show_zero=True)
+        else:
+            print('\%rsp:', self.registers.show_rsp())
         self.cond_code.show()

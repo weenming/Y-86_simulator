@@ -3,7 +3,6 @@ class Error(Exception):
 
 
 class AddressError(Error):
-    print('address out of range!')
     pass
 
 
@@ -11,5 +10,5 @@ class Halt(Error):
     pass
 
 
-class INstructionError(Error):
+class InstructionError(Error):
     pass

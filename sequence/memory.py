@@ -7,7 +7,7 @@ def select_write(cpu):
     if cpu.icode in [4, 10]:  # pushq or rmmovq
         return cpu.valE, cpu.valA
     elif cpu.icode == 8:
-        return cpu.valE, cpu.valE
+        return cpu.valE, Word(cpu.valP)  # callq
     else:
         return None, None
 
