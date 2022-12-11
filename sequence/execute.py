@@ -5,7 +5,7 @@ from abstraction import *
 
 def select_operation(cpu):
     icode = cpu.icode
-    if icode in [0, 1]:
+    if icode in [0]:
         assert 0, 'bad icode: should not run here'
     elif icode == 6:  # OPq
         op1 = cpu.valB
@@ -42,7 +42,7 @@ def select_operation(cpu):
         operator = '+'
         op1 = cpu.valB
         op2 = Word(8)
-    elif icode == 7:  # jXX
+    elif icode in [1, 7]:  # nop or jXX
         operator = None
         op1 = None
         op2 = None
