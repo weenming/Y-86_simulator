@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../static/index.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script> -->
+    <link rel="stylesheet" type="text/css" href="../static/index.css" />
+    <title>Y86 Simulator</title>
+</head>
+<body onload="init()">
+    <h1>Y86 Simulator</h1>
+    <!-- 文件输入 -->
+    <input type="file" id="file">
+    <input type="submit" id="submit" onclick="upload()">
+
+    <!-- 代码 -->
+    <div id="code_div">
+        <p>Codes</p>
+        <table id="code">
+            <tr> <th>Line</th> <th>PC</th> <th>Binary Code</th> <th>Text</th> </tr>
+        </table>
+    </div>
+
+    <!-- 按钮交互 -->
+    <div id="button_div">
+        <button id="one_ins" onclick="one_ins()">运行一条指令</button>
+        <button id="one_step" onclick="one_step()">运行一步</button>
+    </div>
+
+    <!-- 寄存器 -->
+    <div id="register_div">
+        <p>Registers</p>
+        <table id="register">
+            <tr> <th>Register Name</th> <th>Register Value</th> </tr>
+        </table>
+    </div>
+
+    <!-- 程序计数器 -->
+    <div id="pc_div">
+        <p>Program Counter</p>
+        <table id="pc">
+            <tr> <th>PC Value</th> </tr>
+        </table>
+    </div>
+
+    <!-- 条件码 -->
+    <div id="cc_div">
+        <p>Condition Codes</p>
+        <table id="cc">
+            <tr> <th>CC Name</th> <th>CC Value</th> </tr>
+        </table>
+    </div>
+
+    <!-- 程序状态 -->
+    <div id="stat_div">
+        <p>Status</p>
+        <table id="stat">
+            <tr> <th>Stat Value</th> </tr>
+        </table>
+    </div>
+
+    <!-- 内存 -->
+    <div id="memory_div">
+        <p>Memory</p>
+        <table id="memory">
+            <tr> <th>Memory Address</th> <th>Value</th> </tr>
+        </table>
+    </div>
+</body>
+</html>

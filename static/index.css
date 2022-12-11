@@ -1,0 +1,5 @@
+table {
+    border: 2px solid black;
+    overflow: scroll;
+    max-height: 300px;
+}
