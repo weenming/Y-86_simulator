@@ -13,6 +13,7 @@ def get_ins():
 def get_ins_test():
     return  '0x030:                      | stack:                # stack'
 
+
 def str_to_byte_ls(input_str: str):
     str_lines = input_str.splitlines(False)
     adr_of_ins = []
@@ -29,10 +30,14 @@ def str_to_byte_ls(input_str: str):
             ins.append(this_ins)
     return adr_of_ins, ins
 
+
 def build_json_dic(cpu:CPU):
     cpu_info = {'PC':cpu.PC, 'REG':cpu.registers.get_reg_dict(), 'CC': cpu.cond_code.get_CC_dict()\
         , 'STAT': cpu.stat.val, 'MEM': cpu.memory.get_mem_dict()} # current state of the cpu stored in a python dict
     return cpu_info
+
+
+
 
 if __name__ == '__main__':
     adr_ls, ins_str_ls = str_to_byte_ls(get_ins())
@@ -63,7 +68,7 @@ if __name__ == '__main__':
 
     while True:
         try:
-            cpu.cycle()
+            cpu.run(cycle=True)
             cpu.show_cpu(show_regs=True)
             cpu.memory.show_mem()
             print('\n')

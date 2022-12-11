@@ -81,10 +81,7 @@ class Stat():
         return self.name_ls[self.val - 1]
 
     def is_ok(self):
-        if self.val == 1:
-            return True
-        else:
-            return False
+        return self.val == 1
 
     def raise_error(self):
         if self.val == 2:
