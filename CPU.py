@@ -14,6 +14,7 @@ class CPU():
     '''
 
     def __init__(self, mem: Memory, get_ins=None, debug=False):
+        # debug mode: print a lot of info, should not be used in test.py
         self.debug=debug
         self.ALU = ALU()
         self.cond_code = CondCode()
@@ -32,53 +33,27 @@ class CPU():
         self.cycle_gen.send(None)
         if self.debug:
             print('CPU init finished')
+    
 
     def cycle(self):
         # when trying to run the cpu with a error stat code, raise error.
-        is_cycle = yield True
+        is_cycle = yield
+        stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
+              self.write_back_stage, self.update_PC]
         while True:
-            try:
-                    self.fetch_stage()
-                    if not is_cycle:
-                        is_cycle = yield True
-                    self.decode_stage()
-                    if not is_cycle:
-                        is_cycle = yield True
-                    self.execute_stage()
-                    if not is_cycle:
-                        is_cycle = yield True
-                    self.memory_stage()
-                    if not is_cycle:
-                        is_cycle = yield True
-                    self.write_back_stage()
-                    if not is_cycle:
-                        is_cycle = yield True
-                    self.update_PC()
-                    is_cycle = yield True
-            # update to the state before termination
-            except error.Halt:
-                ins = self.get_ins(self.PC)
-                self.icode, self.ifun = self.instruct_mem.update(ins)
-                self.stat.set(2, self)
-            except error.AddressError:
-                if self.debug:
-                    print('address out of range!')
-                
-                self.stat.set(3, self)
-            except error.InstructionError:
-                if self.debug:
-                    print('instruction error:')
-                self.stat.set(4, self)
-            finally:
-                if not self.stat.is_ok():
-                    if self.debug:
-                        print('bad stat code, throwing error')
-                    # self.stat.raise_error()
-                    yield False
+            for stage in stages:
+                stage()
+                if not is_cycle:
+                    is_cycle = yield
+            # cycle: yield after a whole cycle
+            if is_cycle:
+                is_cycle = yield
+
 
     def run(self, cycle=True):
         # if not cycle, execute step by step
-        return self.cycle_gen.send(cycle)
+        self.cycle_gen.send(cycle)
+        return
 
     def fetch_stage(self):
         # Whether or not get valC
@@ -86,7 +61,7 @@ class CPU():
         self.icode, self.ifun = self.instruct_mem.update(ins)
         
         if self.icode == 0:
-            raise error.Halt
+            raise error.Halt()
         # get icode and ifun internally
         # self.icode, self.ifun = self.instruct_mem.fetch()
 
@@ -145,6 +120,28 @@ class CPU():
         self.valP = None
         self.valM = None
         # ...
+    
+    def try_cycle(self):
+        try:
+            self.fetch_stage()
+        except:
+            return
+        try:
+            self.decode_stage()
+        except:
+            return
+        try:
+            self.execute_stage()
+        except:
+            return
+        try:
+            self.memory_stage()
+        except:
+            return
+        try:
+           self.write_back_stage()
+        except:
+            return
 
     def show_cpu(self, show_values=False, show_regs=False):
         print('ins name:', self.instruct_mem.get_instruction_name())

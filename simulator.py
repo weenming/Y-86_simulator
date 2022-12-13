@@ -6,8 +6,8 @@ import sys
 import fileinput
 import json
 
-def get_ins():
-    with open('./test/asumi.yo', 'r') as f:
+def get_ins(fname):
+    with open(fname, 'r') as f:
         text = f.read()
     return text
 
@@ -54,9 +54,34 @@ def run_cpu(cpu:CPU, cycle, debug=False):
     @param  cycle: boolean, if False, run a single stage
     @return        a dictionary formatted as the project instruction, a boolean indicating whether the execution should be terminated
     '''
-    is_ok = cpu.run(cycle)
+    # empty msg: all good
+    err_msg = ''
+    try:
+        cpu.run(cycle)
+        # update to the state before termination
+    except error.Halt as e:
+        cpu.try_cycle()
+        ins = cpu.get_ins(cpu.PC)
+        cpu.icode, cpu.ifun = cpu.instruct_mem.update(ins)
+        cpu.stat.set(2, cpu)
+        err_msg = e.err_msg
+    except error.AddressError as e:
+        if cpu.debug:
+            print('address out of range!')
+        cpu.try_cycle()
+        cpu.stat.set(3, cpu)
+        err_msg = e.err_msg
+    except error.InstructionError as e:
+        if cpu.debug:
+            print('instruction error:')
+        cpu.stat.set(4, cpu)
+        err_msg = e.err_msg
+    finally:
+        if not cpu.stat.is_ok():
+            if cpu.debug:
+                print('bad stat code, throwing error')
     # TODO: value A and so on
-    return build_json_dic(cpu), is_ok
+    return build_json_dic(cpu), err_msg
 
 def init_cpu(ins:str, debug=False):
     adr_ls, ins_str_ls = str_to_byte_ls(ins)
@@ -91,12 +116,13 @@ if __name__ == '__main__':
     cpu_info_dict_ls = []
 
     while True:
-        ok = cpu.run(cycle=True)
+        dic, err_msg = run_cpu(cpu, True)
+        # print('error message:', err_msg)
         # cpu.show_cpu(show_regs=True)
         # cpu.memory.show_mem()
         # print('\n')
         cpu_info_dict_ls.append(build_json_dic(cpu))
-        if not ok:
+        if err_msg != '':
             break
         
     # output the json file to stdout

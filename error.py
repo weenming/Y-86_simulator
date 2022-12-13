@@ -1,5 +1,7 @@
 class Error(Exception):
-    pass
+    def __init__(self, msg): 
+        super().__init__() 
+        self.err_msg = msg
 
 
 class AddressError(Error):
@@ -7,7 +9,8 @@ class AddressError(Error):
 
 
 class Halt(Error):
-    pass
+    def __init__(self): 
+        super().__init__('Halt!') 
 
 
 class InstructionError(Error):

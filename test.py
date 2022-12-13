@@ -65,10 +65,11 @@ def main(test, answer):
         ra = transform_mem(answer[filename])
         if rc != ra:
             print(f"Wrong answer for {filename}")
-            print(f"Your answer: \n{rc}")
-            print(f"Correct answer: \n{ra}")
-            print("Diff:")
-            print(diff_strings(str(rc), str(ra)))
+            if filename == 'j-cc':
+                print(f"Your answer: \n{rc}")
+                print(f"Correct answer: \n{ra}")
+                print("Diff:")
+                print(diff_strings(str(rc), str(ra)))
             # return
         else:
             print("Correct answer for", filename)

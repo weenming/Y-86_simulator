@@ -52,10 +52,36 @@ def run_cpu(cpu:CPU, cycle, debug=False):
     '''
     Runs the cpu, a whole cycle or a single step (stage?) specified by user 
     @param  cycle: boolean, if False, run a single stage
-    @return        a json file formatted as the project instruction
+    @return        a dictionary formatted as the project instruction, a boolean indicating whether the execution should be terminated
     '''
-    cpu.run(cycle)
-    return build_json_dic(cpu)
+    # empty msg: all good
+    err_msg = ''
+    try:
+        cpu.run(cycle)
+        # update to the state before termination
+    except error.Halt as e:
+        cpu.try_cycle()
+        ins = cpu.get_ins(cpu.PC)
+        cpu.icode, cpu.ifun = cpu.instruct_mem.update(ins)
+        cpu.stat.set(2, cpu)
+        err_msg = e.err_msg
+    except error.AddressError as e:
+        if cpu.debug:
+            print('address out of range!')
+        cpu.try_cycle()
+        cpu.stat.set(3, cpu)
+        err_msg = e.err_msg
+    except error.InstructionError as e:
+        if cpu.debug:
+            print('instruction error:')
+        cpu.stat.set(4, cpu)
+        err_msg = e.err_msg
+    finally:
+        if not cpu.stat.is_ok():
+            if cpu.debug:
+                print('bad stat code, throwing error')
+    # TODO: value A and so on
+    return build_json_dic(cpu), err_msg
 
 def init_cpu(ins:str, debug=False):
     adr_ls, ins_str_ls = str_to_byte_ls(ins)
@@ -79,7 +105,7 @@ def init_cpu(ins:str, debug=False):
 
 if __name__ == '__main__':
 
-    cpu = init_cpu(get_ins('./test/prog10.yo'), debug=True)
+    cpu = init_cpu(get_ins('test/prog1.yo'), debug=False)
     '''
     in machine code the value is already stored by little endian....
     val_byte_ls = []
@@ -90,12 +116,13 @@ if __name__ == '__main__':
     cpu_info_dict_ls = []
 
     while True:
-        ok = cpu.run(cycle=True)
-        cpu.show_cpu(show_regs=True)
-        cpu.memory.show_mem()
-        print('\n')
+        dic, err_msg = run_cpu(cpu, True)
+        print('error message:', err_msg)
+        # cpu.show_cpu(show_regs=True)
+        # cpu.memory.show_mem()
+        # print('\n')
         cpu_info_dict_ls.append(build_json_dic(cpu))
-        if not ok:
+        if err_msg != '':
             break
         
     # output the json file to stdout

@@ -2,6 +2,7 @@ import sys
 sys.path.append("./")
 
 from abstraction import *
+import error
 
 
 class InstructMem():
@@ -24,8 +25,10 @@ class InstructMem():
         # set icode and others if applicable
         self.icode = self.data.get_bits(0, 4).get_value_int10()
         self.ifun = self.data.get_bits(4, 8).get_value_int10()
-        assert 0 <= self.icode < 12, 'invalid icode'
-        assert self._check_validity(), 'invalid instruction'
+        if 0 > self.icode or self.icode > 12:
+            raise error.InstructionError('invalid icode')
+        if not self._check_validity():
+            raise error.InstructionError('invalid instruction')
         return self.icode, self.ifun
 
     def _check_validity(self):

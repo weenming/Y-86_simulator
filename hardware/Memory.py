@@ -19,6 +19,7 @@ class Memory:
         while len(byte_ls) < max_adr:
             byte_ls.append(Byte(0))
         self.mem_bytes = byte_ls
+        # no need to specify this early actually
         self.max_adr = max_adr
         return
 
@@ -31,8 +32,10 @@ class Memory:
             return Word(0)
 
         adr = adr.get_signed_value_int10()
-        if adr < 0 or adr + 8 > self.max_adr:  # 'invalid mem adr when reading'
-            raise error.AddressError
+        if adr < 0:  # 'invalid mem adr when reading'
+            raise error.AddressError("bad rsp: should be larger than 0")
+        if adr + 8 > self.max_adr:
+            raise error.AddressError("bad rsp: should be smaller than 0")
 
         # be: big endian; le: little endian
         byte_ls_le = self.mem_bytes[adr: adr + 8]
@@ -58,10 +61,14 @@ class Memory:
             return
 
         adr = adr.get_signed_value_int10()
-        if adr + 8 > self.max_adr:  # 'invalid mem adr: too big'
-            raise error.AddressError
-        if adr < self.rsp_min:  # 'invalid mem adr: access to read-only denied'
-            raise error.AddressError
+        if adr < 0:  # 'invalid mem adr when reading'
+            raise error.AddressError("bad rsp: should be larger than 0")
+        if adr + 8 > self.max_adr:
+            raise error.AddressError("bad rsp: should be smaller than 0")
+        
+        # Seems that this is not considered an error?
+        # if adr < self.rsp_min:  # 'invalid mem adr: access to read-only denied'
+        #     raise error.AddressError
 
         for i in range(8):
             byte = val.get_nth_byte(7 - i)
@@ -71,33 +78,33 @@ class Memory:
     def get_ins(self, PC):
         byte_0th = self.mem_bytes[PC]
         if PC >= self.rsp_min:
-            raise error.AddressError
+            raise error.AddressError("bad PC: should not read ouside from of instruction mem")
 
         icode = byte_0th.get_bits(0, 4).get_value_int10()
         if icode in [0, 1, 9]:
             ins_bits = byte_0th.get_bit_ls()
         elif icode in [2, 6, 10, 11]:
-            if PC + 1 >= self.rsp_min:
-                raise error.AddressError
+            # if PC + 1 >= self.rsp_min:
+            #     raise error.AddressError('bad PC: going to read from outside of ins mem')
             ins_bits = byte_0th.get_bit_ls(
             ) + self.mem_bytes[PC + 1].get_bit_ls()
         elif icode in [3, 4, 5]:  # ir, rm, mrmovq
-            if PC + 9 >= self.rsp_min:
-                raise error.AddressError
+            # if PC + 9 >= self.rsp_min:
+            #     raise error.AddressError('bad PC: going to read from outside of ins mem')
             val_byte_ls_le = self.mem_bytes[PC + 2: PC + 10]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
             byte_1th_ls = self.mem_bytes[PC + 1]
             # icode, ifun | rA, rB | V(D) - big endian
             ins_bits = byte_0th.get_bit_ls() + byte_1th_ls.get_bit_ls() + val_bit_ls_be
         elif icode in [7, 8]:  # jXX, call
-            if PC + 8 >= self.rsp_min:
-                raise error.AddressError
+            # if PC + 8 >= self.rsp_min:
+            #     raise error.AddressError('bad PC: going to read from outside of ins mem')
             val_byte_ls_le = self.mem_bytes[PC + 1: PC + 9]
             val_bit_ls_be = self._reverse_byte_to_bit(val_byte_ls_le)
             # icode, ifun | Dest - big endian
             ins_bits = byte_0th.get_bit_ls() + val_bit_ls_be
         else:
-            raise error.InstructionError
+            raise error.InstructionError("bad icode")
         return DataArb(ins_bits)
 
     def show_mem(self, show_ins=False, show_zero=False):

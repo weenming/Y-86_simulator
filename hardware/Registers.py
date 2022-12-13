@@ -2,6 +2,7 @@ import sys
 sys.path.append("./")
 
 from abstraction import *
+import error
 
 
 class Registers():
@@ -32,9 +33,12 @@ class Registers():
         if address is None or address == 15:
             # skip or access no reg
             return Word(0)
-        # maybe the exception handling need improvement
-        assert 0 <= address < 15, 'invalid register address'
-        assert isinstance(self.regs[address], Word), 'not initialized reg!'
+        
+        # invalid reg adr
+        if 0 > address or address >= 15:
+            raise error.AddressError('invalid register address')
+
+        assert isinstance(self.regs[address], Word), 'not initialized reg! (should not run here)'
         return self.regs[address]
 
     def write(self, address, val):
@@ -44,7 +48,9 @@ class Registers():
         if val is None or address is None or address == 15:
             # skip or access no reg
             return False
-        assert 0 <= address < 15, 'invalid register address'
+        # invalid reg adr
+        if 0 > address or address >= 15:
+            raise error.AddressError('invalid register address')
         self.regs[address] = val
         return True
 

@@ -39,7 +39,7 @@ class CondCode:
         elif ifun == 2:  # l
             res = self.SF ^ self.OF
         elif ifun == 3:  # e
-            res = 1 - self.ZF
+            res = self.ZF
         elif ifun == 4:  # ne
             res = 1 - self.ZF
         elif ifun == 5:  # ge
