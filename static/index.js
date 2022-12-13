@@ -71,7 +71,7 @@ function content(input, flag){
     switch (flag){
         case 0: {
             str = "<tr> <th>Line</th> <th>PC</th> <th>Binary Code</th> <th>Text</th> </tr>";
-            var rows = input.length;
+            rows = input.length;
             for (let i = 0; i < rows; i++){
                 let l = input[i];
                 str += "<tr> <td>" + l.line +"</td> <td>" + l.pc + "</td> <td>" + l.code + "</td> <td>" + l.text + "</td> </tr>"
@@ -125,4 +125,26 @@ function init(){
     foo = "<tr> <td></td> <td></td> </tr>";
     $("#memory").html(str + foo + foo + foo + foo + foo);
 
+}
+
+// function highlight(){
+//     var text = $("#code").html()
+//     var key = "<tr> <td>" + ins_count + "</td> <td>.*</td> <td>.*</td> <td>.*</td> </tr>"
+//     var key_reg = new RegExp(key)
+//     var str = "<tr style='color:blue'> <td>" + ins_count + "</td> <td>.*</td> <td>.*</td> <td>.*</td> </tr>"
+//     var flag = text.search(key_reg)
+//     text.replace(key_reg, str)
+//     $("#code").html(text)
+//     console.log(key_reg.test(str))
+// }
+
+function highlight() {
+    var tbl = document.getElementById("code");;
+    var trs = tbl.getElementsByTagName("tr");
+    console.log(rows)
+    for (let i = 0; i < rows; i++) {
+        trs[i].style.background = "white";
+    }
+    trs[ins_count].style.background = "yellow";
+    console.log(ins_count)
 }

@@ -3,3 +3,7 @@ table {
     overflow: scroll;
     max-height: 300px;
 }
+
+#highlight {
+    background-color: aqua;
+}

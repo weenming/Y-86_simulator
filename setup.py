@@ -50,15 +50,16 @@ def dict_trans(f_name):
     line = 1
     while 1:
         line_text = file.readline()
+        line_text.replace('\n','')
         if not line_text:
             break
         # 正则表达式处理
-        str_temp = re.split('\s*\|', line_text)
+        str_temp = re.split('\s*\|', line_text)     # 按'|'分开
         text = str_temp[1]
         if not re.match('^0x', str_temp[0]):
             pc = code = ''
         else:
-            str_left = re.split(':\s*|\s*$', str_temp[0])
+            str_left = re.split(':\s*|\s*$', str_temp[0])   # 按照':'分开
             pc = str_left[0]
             code = str_left[1]
         # 赋值与边界情况判定
