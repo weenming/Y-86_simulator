@@ -6,8 +6,8 @@ import sys
 import fileinput
 import json
 
-def get_ins():
-    with open('./test/asumi.yo', 'r') as f:
+def get_ins(fname):
+    with open(fname, 'r') as f:
         text = f.read()
     return text
 
@@ -52,11 +52,10 @@ def run_cpu(cpu:CPU, cycle, debug=False):
     '''
     Runs the cpu, a whole cycle or a single step (stage?) specified by user 
     @param  cycle: boolean, if False, run a single stage
-    @return        a dictionary formatted as the project instruction, a boolean indicating whether the execution should be terminated
+    @return        a json file formatted as the project instruction
     '''
-    is_ok = cpu.run(cycle)
-    # TODO: value A and so on
-    return build_json_dic(cpu), is_ok
+    cpu.run(cycle)
+    return build_json_dic(cpu)
 
 def init_cpu(ins:str, debug=False):
     adr_ls, ins_str_ls = str_to_byte_ls(ins)
@@ -80,7 +79,7 @@ def init_cpu(ins:str, debug=False):
 
 if __name__ == '__main__':
 
-    cpu = init_cpu(get_ins_from_stdin(), debug=False)
+    cpu = init_cpu(get_ins('./test/prog10.yo'), debug=True)
     '''
     in machine code the value is already stored by little endian....
     val_byte_ls = []
@@ -92,9 +91,9 @@ if __name__ == '__main__':
 
     while True:
         ok = cpu.run(cycle=True)
-        # cpu.show_cpu(show_regs=True)
-        # cpu.memory.show_mem()
-        # print('\n')
+        cpu.show_cpu(show_regs=True)
+        cpu.memory.show_mem()
+        print('\n')
         cpu_info_dict_ls.append(build_json_dic(cpu))
         if not ok:
             break

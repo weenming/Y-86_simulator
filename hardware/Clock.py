@@ -6,7 +6,7 @@ import error
 class CondCode:
     def __init__(self):
         # initialize conditional codes
-        self.ZF = 0
+        self.ZF = 1
         self.SF = 0
         self.OF = 0
         return
@@ -46,7 +46,6 @@ class CondCode:
             res = 1 - (self.SF ^ self.OF)
         elif ifun == 6:  # g
             res = (1 - (self.SF ^ self.OF)) & (1 - self.ZF)
-            print(res)
         if res == 0:
             return 0
         else:
@@ -72,9 +71,10 @@ class Stat():
 
     def set(self, val, cpu):
         self.val = val
-        print('cpu status before termination:')
-        cpu.show_cpu()
-        print(cpu.stat.name_ls[val - 1])
+        if cpu.debug:
+            print('cpu status before termination:')
+            cpu.show_cpu()
+            print(cpu.stat.name_ls[val - 1])
 
 
     def get_name(self):

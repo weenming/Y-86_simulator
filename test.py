@@ -46,8 +46,12 @@ def main(test, answer):
             except:
                 print(f"Failed to read json or yaml: {file}")
                 return None
-            
+    def read_str(file):
+        with open(file) as f:
+            return f.read()
+    # print({file: read_str(f"temp_answer/{file}") for file in os.listdir('temp_answer')})
     res = {file: try_read(f"temp_answer/{file}") for file in os.listdir('temp_answer')}
+
     if not args.save_mid:
         shutil.rmtree('temp_test')
         shutil.rmtree('temp_answer')
@@ -65,7 +69,10 @@ def main(test, answer):
             print(f"Correct answer: \n{ra}")
             print("Diff:")
             print(diff_strings(str(rc), str(ra)))
-            return
+            # return
+        else:
+            print("Correct answer for", filename)
+    return
     print("All correct!")
 
 # https://gist.github.com/ines/04b47597eb9d011ade5e77a068389521

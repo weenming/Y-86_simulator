@@ -12,7 +12,7 @@ class Memory:
         ins_mem: added starting from 0x0
         '''
         assert len(byte_ls) <= max_adr
-        print('init mem')
+        # print('init mem')
 
         # stack frame cannot grow into space of program code
         self.rsp_min = len(byte_ls) + 8 - len(byte_ls) % 8
