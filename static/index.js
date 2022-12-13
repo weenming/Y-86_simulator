@@ -1,6 +1,4 @@
 var code_dict;   // 指令code_table的字典
-var ins_dict;    // 运行一句的字典
-var step_dict;   // 运行一步的字典
 var rows;      // code_dict总行数
 var ins_count = 0;
 var step_count = 0;
@@ -38,12 +36,12 @@ function one_ins(){
         // contentType: false,
         // processData: false,
         success: function(res){
-            ins_dict = res
-            $("#register").html(content(ins_dict.REG, 1));
-            $("#pc").html(content(ins_dict.PC, 2));
-            $("#cc").html(content(ins_dict.CC, 3));
-            $("#stat").html(content(ins_dict.STAT, 4));
-            $("#memory").html(content(ins_dict.MEM, 5));
+            $("#register").html(content(res.REG, 1));
+            $("#pc").html(content(res.PC, 2));
+            $("#cc").html(content(res.CC, 3));
+            $("#stat").html(content(res.STAT, 4));
+            $("#memory").html(content(res.MEM, 5));
+            highlight(res);
         }
     })
 }
@@ -60,7 +58,7 @@ function one_step(){
         url: 'signal/',
         data: {'signal': signal},
         success: function(res){
-            step_dict = res
+            highlight();
             // console.log('res ' + res + ' ins_count ' + ins_count + ' step_count ' + step_count)
         }
     })
@@ -127,7 +125,16 @@ function init(){
 
 }
 
-// function highlight(){
+// function highlight(res){
+//     var ins_count;
+//     for (var elem in code_dict){
+//         if (elem.pc == res.PC && elem.code != ''){
+//             ins_count = elem.line;
+//             break;
+//         }
+//     }
+
+
 //     var text = $("#code").html()
 //     var key = "<tr> <td>" + ins_count + "</td> <td>.*</td> <td>.*</td> <td>.*</td> </tr>"
 //     var key_reg = new RegExp(key)
@@ -139,6 +146,13 @@ function init(){
 // }
 
 function highlight() {
+    var ins_count;
+    for (var elem in code_dict){
+        if (elem.pc == res.PC && elem.code != ''){
+            ins_count = elem.line;
+            break;
+        }
+    }
     var tbl = document.getElementById("code");;
     var trs = tbl.getElementsByTagName("tr");
     console.log(rows)
