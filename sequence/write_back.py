@@ -2,7 +2,7 @@ from abstraction import *
 
 
 def select_write_back(cpu):
-    if cpu.icode in [3, 6]:
+    if cpu.icode in [3, 6, 12]:
         return cpu.rB, cpu.valE
     elif cpu.icode == 2:
         if cpu.ifun == 0 or cpu.cnd == 1:

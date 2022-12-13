@@ -30,7 +30,7 @@ def select_operation(cpu):
         operator = '+'
         op1 = Word(0)
         op2 = cpu.valC
-    elif icode in [4, 5]:  # rmmov, mrmov
+    elif icode in [4, 5, 12]:  # rmmov, mrmov. iaddq
         operator = '+'
         op1 = cpu.valB
         op2 = cpu.valC
@@ -52,7 +52,7 @@ def select_operation(cpu):
 
 
 def do_update_cc(cpu):
-    if cpu.icode == 6:
+    if cpu.icode in [6, 12]: # opq, iaddq
         return True
     else:
         return False

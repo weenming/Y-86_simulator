@@ -35,7 +35,7 @@ class Registers():
             return Word(0)
         
         # invalid reg adr
-        if 0 > address or address >= 15:
+        if 0 > address or address > 15:
             raise error.AddressError('invalid register address')
 
         assert isinstance(self.regs[address], Word), 'not initialized reg! (should not run here)'
@@ -49,7 +49,7 @@ class Registers():
             # skip or access no reg
             return False
         # invalid reg adr
-        if 0 > address or address >= 15:
+        if 0 > address or address > 15:
             raise error.AddressError('invalid register address')
         self.regs[address] = val
         return True

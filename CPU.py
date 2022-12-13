@@ -85,7 +85,7 @@ class CPU():
         op1, op2, operator = execute.select_operation(self)
 
         self.valE, cc_info = self.ALU.op64(operator, op1, op2)
-        if execute.do_update_cc(self):  # OPq
+        if execute.do_update_cc(self):  # OPq or iaddq
             self.cond_code.set(cc_info)
         if execute.do_update_cnd(self):  # cmovq or jXX
             self.cnd = self.cond_code.is_condition(self.icode, self.ifun)
@@ -182,3 +182,6 @@ class CPU():
         else:
             print('\%rsp:', self.registers.show_rsp())
         self.cond_code.show()
+
+    def get_cpu_vals(self):
+        return {'valA':self.valA, 'valB':self.valB, 'valC':self.valC, 'valE':self.valE, 'valM':self.valM}

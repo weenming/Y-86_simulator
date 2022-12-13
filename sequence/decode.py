@@ -7,7 +7,7 @@ def select_read_reg_srcs(cpu):
         assert 0, 'bad icode: halt should have been dealt with earlier'
     elif cpu.icode in [1, 7]:  # nop or jXX
         return None, None
-    elif cpu.icode in [2, 3, 4, 5, 6]:
+    elif cpu.icode in [2, 3, 4, 5, 6, 12]:
         # in fact some of these instructions, like
         # rrmovq, does not read both valA and valB,
         # but there should be no problem because later selections

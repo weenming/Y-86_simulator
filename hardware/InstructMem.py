@@ -36,11 +36,11 @@ class InstructMem():
 
     def get_instruction_name(self):
         names = ['halt', 'nop', 'rrmovq', 'irmovq', 'rmmovq', 'mrmovq',
-                 'OPq', 'jXX', 'call', 'ret', 'pushq', 'popq']
+                 'OPq', 'jXX', 'call', 'ret', 'pushq', 'popq', 'iaddq']
         return names[self.icode]
 
     def get_valC(self):
-        if self.icode in [3, 4, 5]:
+        if self.icode in [3, 4, 5, 12]: # irmov, rmmov, mrmov, iadd
             return Word(self.data.get_bits(16, 80))
         elif self.icode in [7, 8]:
             return Word(self.data.get_bits(8, 72))
@@ -50,12 +50,12 @@ class InstructMem():
     def get_reg_address(self) -> int:
         # not tested
         # notice: rA or rB == 16 means no access to regs
-        if self.icode in [2, 3, 4, 5, 6, 10, 11]:
+        if self.icode in [2, 3, 4, 5, 6, 10, 11, 12]:
             rA = self.data.get_bits(8, 12).get_value_int10()
             rB = self.data.get_bits(12, 16).get_value_int10()
             return rA, rB
         elif self.icode in [0, 1, 7, 8, 9]:
-            return None, None
+            return 15, 15
         else:
             assert 0, 'bad icode'
             return

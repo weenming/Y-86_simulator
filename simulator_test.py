@@ -105,7 +105,7 @@ def init_cpu(ins:str, debug=False):
 
 if __name__ == '__main__':
 
-    cpu = init_cpu(get_ins('test/prog1.yo'), debug=False)
+    cpu = init_cpu(get_ins('test/prog10.yo'), debug=True)
     '''
     in machine code the value is already stored by little endian....
     val_byte_ls = []
@@ -118,9 +118,9 @@ if __name__ == '__main__':
     while True:
         dic, err_msg = run_cpu(cpu, True)
         print('error message:', err_msg)
-        # cpu.show_cpu(show_regs=True)
-        # cpu.memory.show_mem()
-        # print('\n')
+        cpu.show_cpu(show_regs=True)
+        cpu.memory.show_mem()
+        print('\n')
         cpu_info_dict_ls.append(build_json_dic(cpu))
         if err_msg != '':
             break

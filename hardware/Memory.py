@@ -81,14 +81,14 @@ class Memory:
             raise error.AddressError("bad PC: should not read ouside from of instruction mem")
 
         icode = byte_0th.get_bits(0, 4).get_value_int10()
-        if icode in [0, 1, 9]:
+        if icode in [0, 1, 9]: # 1 Byte
             ins_bits = byte_0th.get_bit_ls()
-        elif icode in [2, 6, 10, 11]:
+        elif icode in [2, 6, 10, 11]: # 2 Bytes
             # if PC + 1 >= self.rsp_min:
             #     raise error.AddressError('bad PC: going to read from outside of ins mem')
             ins_bits = byte_0th.get_bit_ls(
             ) + self.mem_bytes[PC + 1].get_bit_ls()
-        elif icode in [3, 4, 5]:  # ir, rm, mrmovq
+        elif icode in [3, 4, 5, 12]:  # 10 Bytes: ir, rm, mrmovq, iaddq
             # if PC + 9 >= self.rsp_min:
             #     raise error.AddressError('bad PC: going to read from outside of ins mem')
             val_byte_ls_le = self.mem_bytes[PC + 2: PC + 10]
@@ -96,7 +96,7 @@ class Memory:
             byte_1th_ls = self.mem_bytes[PC + 1]
             # icode, ifun | rA, rB | V(D) - big endian
             ins_bits = byte_0th.get_bit_ls() + byte_1th_ls.get_bit_ls() + val_bit_ls_be
-        elif icode in [7, 8]:  # jXX, call
+        elif icode in [7, 8]:  # 9 Bytes: jXX, call
             # if PC + 8 >= self.rsp_min:
             #     raise error.AddressError('bad PC: going to read from outside of ins mem')
             val_byte_ls_le = self.mem_bytes[PC + 1: PC + 9]

@@ -65,7 +65,7 @@ def main(test, answer):
         ra = transform_mem(answer[filename])
         if rc != ra:
             print(f"Wrong answer for {filename}")
-            if filename == 'j-cc':
+            if filename == 'asumi':
                 print(f"Your answer: \n{rc}")
                 print(f"Correct answer: \n{ra}")
                 print("Diff:")
