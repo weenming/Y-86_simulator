@@ -51,8 +51,13 @@ def build_json_dic(cpu:CPU):
 def run_cpu(cpu:CPU, cycle, debug=False):
     '''
     Runs the cpu, a whole cycle or a single step (stage?) specified by user 
+    
     @param  cycle: boolean, if False, run a single stage
-    @return        a dictionary formatted as the project instruction, a boolean indicating whether the execution should be terminated
+    @return        a dictionary formatted as the project instruction
+                   an error message containing descritions of the specific error happending
+                      if there's no error, this would be an empty string
+                   a dictionary containing tmp values of the CPU, or the signals in the wires I think
+                      may contain None variables
     '''
     # empty msg: all good
     err_msg = ''
@@ -81,9 +86,16 @@ def run_cpu(cpu:CPU, cycle, debug=False):
             if cpu.debug:
                 print('bad stat code, throwing error')
     # TODO: value A and so on
-    return build_json_dic(cpu), err_msg
+    return build_json_dic(cpu), err_msg, cpu.get_cpu_vals()
 
 def init_cpu(ins:str, debug=False):
+    '''
+    Call this function to initialize the cpu
+    
+    @param  ins:    a string containing instructions
+            debug:  a boolean specifying whether to print info for debugging
+    @return cpu, an instance of the CPU class, initialized with memory containing the instrcutions passed in
+    '''
     adr_ls, ins_str_ls = str_to_byte_ls(ins)
     byte_ls = []
     for ins_str, adr in zip(ins_str_ls, adr_ls):
