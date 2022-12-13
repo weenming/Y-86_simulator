@@ -27,21 +27,33 @@ class CPU():
         self._clear_tmp()
         if get_ins == None:  # default: get instructions from memory
             self.get_ins = self.memory.get_ins
+        self.cycle_gen = self.cycle()
+        self.cycle_gen.send(None)
         print('CPU init finished')
 
     def cycle(self):
         # when trying to run the cpu with a error stat code, raise error.
-        if not self.stat.is_ok():
-            print('bad stat code, throwing error')
-            self.stat.raise_error()
+        is_cycle = yield
         try:
-            self.fetch_stage()
-            self.decode_stage()
-            self.execute_stage()
-            self.memory_stage()
-            self.write_back_stage()
-            self.update_PC()
-            return True
+            while True:
+                self.fetch_stage()
+                if not is_cycle:
+                    is_cycle = yield
+                self.decode_stage()
+                if not is_cycle:
+                    is_cycle = yield
+                self.execute_stage()
+                if not is_cycle:
+                    is_cycle = yield
+                self.memory_stage()
+                if not is_cycle:
+                    is_cycle = yield
+                self.write_back_stage()
+                if not is_cycle:
+                    is_cycle = yield
+                self.update_PC()
+                is_cycle = yield
+
         except error.Halt:
             self.stat.set(2, self)
         except error.AddressError:
@@ -50,7 +62,15 @@ class CPU():
         except error.InstructionError:
             print('instruction error:')
             self.stat.set(4, self)
+        finally:
+            if not self.stat.is_ok():
+                print('bad stat code, throwing error')
+                self.stat.raise_error()
         return False
+
+    def run(self, cycle=True):
+        # if not cycle, execute step by step
+        self.cycle_gen.send(cycle)
 
     def fetch_stage(self):
         # Whether or not get valC
