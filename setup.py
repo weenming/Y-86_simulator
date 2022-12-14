@@ -1,25 +1,9 @@
 import os, re, json
 from flask import Flask, request, render_template, jsonify, Response
 from werkzeug.utils import secure_filename
+import backend.simulator as sim
 
-cpu =   {
-            "PC": 0,
-            "REG": {
-                "rax": 1,
-                "rcx": -2,
-                "rdx": 3,
-            },
-            "CC": {
-                "ZF": 1,
-                "SF": 0,
-                "OF": 2,
-            },
-            "STAT": 1,
-            "MEM": {
-                "64": 4294901760,
-                "72": 65535,
-            },
-        }
+global cpu
 
 ALLOWED_EXTENSIONS = {'yo'}
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__),'upload')
@@ -34,6 +18,7 @@ def allowed_file(filename):
 def index():
     return render_template('index.html')
 
+
 @app.route('/upload/', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
@@ -41,7 +26,13 @@ def upload():
         f_name = secure_filename(f.filename)
         f.save(os.path.join(UPLOAD_FOLDER, f_name))
         code_dict = dict_trans(f_name)
+
+        f_text = sim.get_ins("./upload/" + f_name)
+        global cpu
+        cpu = sim.init_cpu(f_text)
+
         return jsonify(code_dict)
+
 
 # 读取路径为 './upload/' + f_name 的文件，并通过正则表达式处理，返回字典
 def dict_trans(f_name):
@@ -70,15 +61,21 @@ def dict_trans(f_name):
         line += 1
     return ins
 
+
 @app.route('/signal/')
 def signal():
+    global cpu
     signal = request.args.get('signal')
+    if signal == 'ins':
+        dic, err_msg, _ = sim.run_cpu(cpu, True)
+    elif signal == 'step':
+        dic, err_msg, reg_file = sim.run_cpu(cpu, False)
+        dic.update({'TEMP': reg_file})
+        # print(dic)
+    dic['ERR'] = err_msg
     # 直接用jsonify会按照键值排序后输出
-    return Response(json.dumps(cpu), mimetype='application/json')
-    # if signal == 'ins':
-    #     return jsonify(ins_dict)
-    # elif signal == 'step':
-    #     return jsonify(step_dict)
+    return Response(json.dumps(dic), mimetype='application/json')
+
 
 
 if __name__ == '__main__':
