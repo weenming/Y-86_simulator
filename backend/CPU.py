@@ -111,8 +111,7 @@ class CPU():
     def decode_stage(self):
         r1, r2 = decode.select_read_reg_srcs(self)
 
-        self.valA = self.registers.read(r1)
-        self.valB = self.registers.read(r2)
+        self.valA, self.valB = self.registers.read_2_ports(r1, r2)
         return
 
     def execute_stage(self):

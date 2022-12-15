@@ -26,7 +26,7 @@ class Registers():
                 print(f'{self.names[i]}({i}):', self.regs[i].get_str_hex())
         return
 
-    def read(self, address):
+    def _read(self, address):
         '''
         Returns a Word type data
         '''
@@ -40,6 +40,12 @@ class Registers():
 
         assert isinstance(self.regs[address], Word), 'not initialized reg! (should not run here)'
         return self.regs[address]
+
+    def read_2_ports(self, address1, address2):
+        '''
+        Returns a Word type data
+        '''
+        return self._read(address1), self._read(address2)
 
     def write(self, address, val):
         '''
