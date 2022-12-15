@@ -100,7 +100,7 @@ def init_cpu(ins:str, debug=False):
 
 if __name__ == '__main__':
 
-    cpu = init_cpu(get_ins_from_stdin(), debug=False)
+    cpu = init_cpu(get_ins('./test/prog10.yo'), debug=False)
     '''
     in machine code the value is already stored by little endian....
     val_byte_ls = []

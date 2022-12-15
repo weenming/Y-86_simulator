@@ -45,7 +45,7 @@ class CPU():
                     return
 
     def cycle(self):
-        # when trying to run the cpu with a error stat code, raise error.
+        # when trying to run the cpu with an error stat code, raise error.
         is_cycle = yield ''
         stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
               self.write_back_stage, self.update_PC]
@@ -79,12 +79,15 @@ class CPU():
                 if not self.stat.is_ok():
                     if self.debug:
                         print('bad stat code, throwing error')
-                    return err_msg
+                    yield err_msg
 
     def run(self, cycle=True):
         # if not cycle, execute step by step
-        err_msg = self.cycle_gen.send(cycle)
-        return err_msg
+        if self.stat.is_ok():
+            err_msg = self.cycle_gen.send(cycle)
+            return err_msg
+        else:
+            return f'This CPU has stopped, stat: {self.stat.val}'
 
     def fetch_stage(self):
         # Whether or not get valC
