@@ -32,14 +32,16 @@ function one_instr(){
     if (!run_flag) {
         alert("ALERT: You should upload files first!")
     }
-    $.ajax({
-        url: 'signal/',
-        data: {'signal': 'instr'},    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
-        success: function(res){
-            stage = 0;
-            update(res);
-        }
-    })
+    else {
+        $.ajax({
+            url: 'signal/',
+            data: {'signal': 'instr'},    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
+            success: function(res){
+                stage = 0;
+                update(res);
+            }
+        })
+    }
 }
 
 // 执行特定一阶段(fetch, decode, excute, memory, write back, PC update)
@@ -47,15 +49,17 @@ function one_stage(){
     if (!run_flag) {
         alert("ALERT: You should upload files first!")
     }
-    $.ajax({
-        url: 'signal/',
-        data: {'signal': 'stage'},       // signal='instr'：运行一条指令；signal='stage'：运行一个阶段，传参给后端
-        success: function(res){
-            stage++;
-            if (stage >= 6) stage -= 6;
-            update(res);
-        }
-    })
+    else {
+        $.ajax({
+            url: 'signal/',
+            data: {'signal': 'stage'},       // signal='instr'：运行一条指令；signal='stage'：运行一个阶段，传参给后端
+            success: function(res){
+                stage++;
+                if (stage >= 6) stage -= 6;
+                update(res);
+            }
+        })
+    }
 }
 
 // 重置

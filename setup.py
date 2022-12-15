@@ -31,9 +31,6 @@ def upload():
         code_dict = dict_trans(f_name)
         f_text = sim.get_ins("./upload/" + f_name)
         cpu, mem_dict, rsp_min = sim.init_cpu(f_text)
-        
-        # 这边是后端接口没写好，对传的数据进行进制转换。将一开始的指令内存存进去。
-
 
         return jsonify({"code_dict": code_dict, "MEM": mem_dict, "TEMP": {"rsp_min": rsp_min}})
 
@@ -75,9 +72,7 @@ def signal():
         dic.update({'TEMP': reg_file})
     elif signal == 'reset':
         cpu, mem_dict, rsp_min = sim.init_cpu(f_text)
-        # 这边是后端接口没写好，对传的数据进行进制转换。将一开始的指令内存存进去。
-        mem_dict = cpu.memory.get_mem_dict(format='str')
-        rsp_min = cpu.memory.rsp_min
+
         return jsonify({"code_dict": code_dict, "MEM": mem_dict, "TEMP": {"rsp_min": rsp_min}})
     dic['ERR'] = err_msg
     dic['TEMP']['rsp_min'] = str(cpu.memory.rsp_min)
