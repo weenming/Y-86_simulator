@@ -66,31 +66,9 @@ def run_cpu(cpu:CPU, cycle, debug=False, format='str'):
                       may contain None variables
     '''
     # empty msg: all good
-    err_msg = ''
-    try:
-        cpu.run(cycle)
-        # update to the state before termination
-    except error.Halt as e:
-        cpu.try_cycle()
-        ins = cpu.get_ins(cpu.PC)
-        cpu.icode, cpu.ifun = cpu.instruct_mem.update(ins)
-        cpu.stat.set(2, cpu)
-        err_msg = e.err_msg
-    except error.AddressError as e:
-        if cpu.debug:
-            print('address out of range!', e.err_msg)
-        cpu.try_cycle()
-        cpu.stat.set(3, cpu)
-        err_msg = e.err_msg
-    except error.InstructionError as e:
-        if cpu.debug:
-            print('instruction error:', e.err_msg)
-        cpu.stat.set(4, cpu)
-        err_msg = e.err_msg
-    finally:
-        if not cpu.stat.is_ok():
-            if cpu.debug:
-                print('bad stat code, throwing error')
+    err_msg = cpu.run(cycle)
+    # update to the state before termination
+
     return build_json_dic(cpu, format), err_msg, cpu.get_cpu_vals()
 
 def init_cpu(ins:str, debug=False):
