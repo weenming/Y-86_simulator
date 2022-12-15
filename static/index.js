@@ -1,10 +1,10 @@
 var code_dict;   // 指令code_table的字典
 var stage = 0;   // 用于标记单阶段运行，下一阶段为哪一阶段
-var rsp_init = false;   // 用于标记rsp是否初始化过
 const STAGE_MAX = 6;
 const REGISTER_LIST = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', '/']
 const CC_LIST = ['ZF', 'SF', 'OF']
 const STAGE_NAME = ['FETCH', 'DECODE', 'EXECUTE', 'MEMORY', 'WRITE BACK', 'PC UPDATE']
+var run_flag = false;
 
 
 function upload(){
@@ -17,37 +17,49 @@ function upload(){
         contentType: false,
         processData: false,
         success: function(res){     // response 回调函数
-            code_dict = res;
+            code_dict = res.code_dict;
             init();
             $("#code").html(content(code_dict, 0));
-            highlight(0, 'init');
+            $("#memory").html(content(res, 5))
+            highlight(res, 'init');
+            run_flag = true;
         }
     })
 }
 
 // 执行一条指令
 function one_instr(){
-    $.ajax({
-        url: 'signal/',
-        data: {'signal': 'instr'},    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
-        success: function(res){
-            stage = 0;
-            update(res);
-        }
-    })
+    if (!run_flag) {
+        alert("ALERT: You should upload files first!")
+    }
+    else {
+        $.ajax({
+            url: 'signal/',
+            data: {'signal': 'instr'},    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
+            success: function(res){
+                stage = 0;
+                update(res);
+            }
+        })
+    }
 }
 
 // 执行特定一阶段(fetch, decode, excute, memory, write back, PC update)
 function one_stage(){
-    $.ajax({
-        url: 'signal/',
-        data: {'signal': 'stage'},       // signal='instr'：运行一条指令；signal='stage'：运行一个阶段，传参给后端
-        success: function(res){
-            stage++;
-            if (stage >= 6) stage -= 6;
-            update(res);
-        }
-    })
+    if (!run_flag) {
+        alert("ALERT: You should upload files first!")
+    }
+    else {
+        $.ajax({
+            url: 'signal/',
+            data: {'signal': 'stage'},       // signal='instr'：运行一条指令；signal='stage'：运行一个阶段，传参给后端
+            success: function(res){
+                stage++;
+                if (stage >= 6) stage -= 6;
+                update(res);
+            }
+        })
+    }
 }
 
 // 重置
@@ -55,10 +67,11 @@ function reset(){
     $.ajax({
         url: 'signal/',
         data: {'signal': 'reset'},    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
-        success: function(){
+        success: function(res){
             init();
             $("#code").html(content(code_dict, 0));
-            highlight(0, 'init');
+            $("#memory").html(content(res, 5))
+            highlight(res, 'init');
         }
     })
 }
@@ -125,32 +138,15 @@ function content(input, flag){
             str = "<tr> <th>Address</th> <th>Value</th> </tr>";
             let mem_arr = Object.entries(input.MEM);
             let length = mem_arr.length;
-            let rsp = input.REG.rsp;
-            let rsp_min = input.TEMP.rsp_min;   // 标记代码段内存最大处
-            
-            // rsp是否初始化
-            if (rsp != '0x0' && rsp_init == false) {
-                rsp_init = true
-            }
-            
-            // memory代码段最多延申到code_length处
-            let code_length = 0;
-            while(1) {
-                if (mem_arr[code_length][0] == rsp_min || code_length == length)
-                    break;
-                else code_length++;
-            }
 
-            console.log(rsp);
-            console.log(rsp_min);
-            console.log(mem_arr[code_length][0])
-            
-            // memory代码段输出
-            for (let i = code_length - 1; i >= 0; i --){
+            // memory输出
+            for (let i = length - 1; i >= 0; i --){
                 let addr = '0x' + Number(mem_arr[i][0]).toString(16); 
                 let val = mem_arr[i][1];
                 str += "<tr> <td>" + full_str(addr, 3) + "</td> <td>" + full_str(val) + "</td> </tr>";
             }
+
+
             break;
         }
         case 6: {
@@ -173,7 +169,7 @@ function content(input, flag){
 
 function init(){
     // code table
-    let str = "<tr> <th></th> </tr>";
+    let str = "<tr> <td></td> </tr>";
     let foo = "<tr> <td></td> </tr>";
     $("#code").html(str + foo + foo + foo + foo + foo + foo + foo + foo + foo);
     
@@ -214,21 +210,26 @@ function init(){
 
 // 执行过程中高亮实现
 function highlight(res, option='next') {
-
     // code table第instr_count行高亮
     var instr_count = next_code(res, option)
     var tbl = document.getElementById("code");
-    sub_highlight(tbl, instr_count - 1);
+    sub_highlight(tbl, instr_count - 1)
     
     if (option == 'next'){
-            // register table第[line]行高亮
-    line = next_register(res);
-    tbl = document.getElementById("register");
-    sub_highlight(tbl, line);
+        // register table第[line]行高亮
+        line = next_register(res);
+        tbl = document.getElementById("register");
+        sub_highlight(tbl, line);
     }
+
+    // memory table代码段高亮
+    line = next_mem(res, option='init')
+    tbl = document.getElementById("memory");
+    sub_highlight(tbl, line);
+
 }
 
-// 得到code table高亮的行数
+// 得到code table高亮的行
 function next_code(res, option='next'){
     var instr_count;
     // 下一步的高亮
@@ -254,9 +255,8 @@ function next_code(res, option='next'){
     return instr_count
 }
 
-// 得到register table高亮的行数
+// 得到register table高亮的行
 function next_register(res){
-    // console.log(res.TEMP.rA)
     // 若有15，不返回F寄存器
     if (res.TEMP.rA == 15 && res.TEMP.rB == 15) {
         return [];
@@ -271,21 +271,56 @@ function next_register(res){
         return [res.TEMP.rA + 1, res.TEMP.rB + 1];
 }
 
-function sub_highlight(tbl, line) {
+// 得到memory table高亮的行
+function next_mem(res, option='next'){
+    let mem_arr = Object.entries(res.MEM);
+    let rows = mem_arr.length;
+    // 代码段高亮
+    
+        // 标记代码段内存最大处
+        let rsp_min = res.TEMP.rsp_min;
+
+        // memory代码段最多延申到code_length处
+        let code_length = 0;
+        while(1) {
+            if (mem_arr[code_length][0] == rsp_min || code_length == rows)
+                break;
+            else code_length++;
+        }
+
+        // 代码段
+        line = Array(code_length)
+        for (i = 0; i < code_length; i++) {
+            line[i] = rows - code_length + i + 1
+        }
+        return line
+
+
+}
+
+function sub_highlight(tbl, line, cover=true, color="rgba(30, 255, 150, 0.5)", 
+            color1="rgba(30, 144, 255, 0.15)", color2="rgba(30, 144, 255, 0.3)") 
+{
     var trs = tbl.getElementsByTagName("tr");
     let rows = trs.length;
-    // console.log(rows);
-    // console.log(line);
-    for (let i = 0; i < rows; i++) {
-        trs[i].style.background = "white";
+
+    if (cover) {
+        for (let i = 0; i < rows; i++) {
+            if (i % 2 == 0){
+                trs[i].style.background = color2;
+            }
+            else {
+                trs[i].style.background = color1;
+            }
+        }
     }
     if (typeof(line) == 'number') {
-        trs[line].style.background = "yellow";
+        trs[line].style.background = color;
     }
     else if (typeof(line) == 'object') {
         let length = line.length;
         for (let i = 0; i < length; i++) {
-            trs[line[i]].style.background = "yellow";
+            trs[line[i]].style.background = color;
         }
     }
     return;

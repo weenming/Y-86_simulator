@@ -19,7 +19,7 @@
 }
 #input {
     position: absolute;
-    left: 50%;
+    left: 60%;
     top: 35px;
 }
 #file_fake {
@@ -44,23 +44,7 @@
     filter: alpha(opacity=0);
     cursor: pointer;
 }
-#button_div {
-    position: absolute;
-    width: 30%;
-    left: 60%;
-    top: 20px;
-}
-#button_div button{
-    text-align: center;
-    height: 30px;
-    margin: 10px;
-    padding: 4px 10px;
-    background-color: #fafafa;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 15px;
-    cursor: pointer;
-}
+
 
  
 
@@ -69,14 +53,22 @@ table {
     text-align: center;
 }
 table, th, td{
-    border: 2px solid black;
     height: 28px;
     min-width: 50px;
     font-size: 10px;
+    border-radius: 5px;
 }
 td {
-    border: 1px solid black;
     font-family: 'consolas';
+}
+th {
+    background-color: #46a4ff;
+}
+table tr:nth-child(even) {
+    background-color: #1e90ff26;
+}
+table tr:nth-child(odd) {
+    background-color: #1e90ff4d;
 }
 
 
@@ -101,7 +93,7 @@ td {
     font-family: 'consolas';
     overflow: scroll;
     width: 100%;
-    max-height: 350px;
+    max-height: 250px;
 }
 #code_div th, #code_div td{
     border: 0;
@@ -112,14 +104,94 @@ td {
 }
 #code_div table {
     text-align: justify;
-    border: 1.5px solid black;
+    /* border: 1.5px solid black; */
     width: 100%;
     max-height: 250px;
 }
+#button_div {
+    position: relative;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
+#button_div button{
+    text-align: center;
+    height: 30px;
+    margin: 10px;
+    padding: 4px 10px;
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 15px;
+    cursor: pointer;
+}
+#one_instr {
+    position: absolute;
+    left: 10%;
+}
+#one_stage {
+    position: absolute;
+    left: 40%;
+}
+#reset {
+    position: absolute;
+    left: 70%;
+}
 #stage_div {
     width: 100%;
+    position: relative;
 }
-
+#stage_div table{
+    width: 100%;
+}
+#instr_mem, #reg_file, #ALU, #data_mem, #CC, #pc_inc, #PC{
+    text-align: center;
+    position: absolute;
+    background-color: darksalmon;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+#instr_mem {
+    width: 100px;
+    height: 44px;
+    top: 20px;
+}
+#pc_inc {
+    width: 94px;
+    height: 44px;
+    top: 120px;
+}
+#reg_file {
+    width: 80px;
+    height: 42px;
+    top: 50px;
+    left: 20%;
+}
+#ALU {
+    width: 50px;
+    height: 26px;
+    top: 120px;
+    left: 40%;
+}
+#CC {
+    width: 50px;
+    height: 26px;
+    top: 20px;
+    left: 40%;
+}
+#data_mem {
+    width: 80px;
+    height: 44px;
+    top: 50px;
+    left: 60%;
+}
+#PC {
+    width: 50px;
+    height: 26px;
+    top: 50px;
+    left: 80%;
+}
 
 
 /* Middle */
@@ -156,7 +228,6 @@ td {
 #mem_div th{
     position: sticky;
     top: 0;
-    background-color: white;
 }
 #small {
     position: relative;
