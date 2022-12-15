@@ -34,15 +34,6 @@ class CPU():
         if self.debug:
             print('CPU init finished')
     
-    def try_cycle(self):
-        stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
-              self.write_back_stage, self.update_PC]
-        while True:
-            for stage in stages:
-                try:
-                    stage()
-                except:
-                    return
 
     def cycle(self):
         # when trying to run the cpu with an error stat code, raise error.
@@ -50,36 +41,34 @@ class CPU():
         stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
               self.write_back_stage, self.update_PC]
         while True:
-            try:
-                for stage in stages:
+            for stage in stages:
+                try:
                     stage()
                     if not is_cycle:
                         is_cycle = yield ''
-                # cycle: yield after a whole cycle
-                if is_cycle:
-                    is_cycle = yield ''
-            except error.Halt as e:
-                self.try_cycle()
-                ins = self.get_ins(self.PC)
-                self.icode, self.ifun = 0, 0
-                self.stat.set(2, self)
-                err_msg = e.err_msg
-            except error.AddressError as e:
-                if self.debug:
-                    print('address out of range!', e.err_msg)
-                self.try_cycle()
-                self.stat.set(3, self)
-                err_msg = e.err_msg
-            except error.InstructionError as e:
-                if self.debug:
-                    print('instruction error:', e.err_msg)
-                self.stat.set(4, self)
-                err_msg = e.err_msg
-            finally:
-                if not self.stat.is_ok():
+                except error.Halt as e:
+                    self.icode, self.ifun = 0, 0
+                    self.stat.set(2, self)
+                    err_msg = e.err_msg
+                except error.AddressError as e:
                     if self.debug:
-                        print('bad stat code, throwing error')
-                    yield err_msg
+                        print('address out of range!', e.err_msg)
+                    self.stat.set(3, self)
+                    err_msg = e.err_msg
+                except error.InstructionError as e:
+                    if self.debug:
+                        print('instruction error:', e.err_msg)
+                    self.stat.set(4, self)
+                    err_msg = e.err_msg
+                finally:
+                    if not self.stat.is_ok():
+                        if self.debug:
+                            print('bad stat code, throwing error')
+                        yield err_msg
+            # cycle: yield after a whole cycle
+            if is_cycle:
+                is_cycle = yield ''
+
 
     def run(self, cycle=True):
         # if not cycle, execute step by step

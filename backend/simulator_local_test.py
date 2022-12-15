@@ -46,10 +46,10 @@ def str_to_byte_ls(input_str: str):
 
 def build_json_dic(cpu:CPU, format):
     if format == 'str':  
-        PC = Word(cpu.PC).get_str_hex()
+        PC = cpu.PC.get_str_hex()
     else:
         # format: int
-        PC = cpu.PC
+        PC = cpu.PC.get_signed_value_int10()
     cpu_info = {'PC':PC, 'REG':cpu.registers.get_reg_dict(format = format), 'CC': cpu.cond_code.get_CC_dict()\
         , 'STAT': cpu.stat.val, 'MEM': cpu.memory.get_mem_dict(format = format)} # current state of the cpu stored in a python dict
     return cpu_info
@@ -100,7 +100,7 @@ def init_cpu(ins:str, debug=False):
 
 if __name__ == '__main__':
 
-    cpu = init_cpu(get_ins('./test/prog10.yo'), debug=False)
+    cpu = init_cpu(get_ins('./test/asumi.yo'), debug=False)
     '''
     in machine code the value is already stored by little endian....
     val_byte_ls = []
