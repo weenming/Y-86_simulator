@@ -75,7 +75,8 @@ class Memory:
             self.mem_bytes[adr + i] = byte
         return
 
-    def get_ins(self, PC):
+    def get_ins(self, PC:Word):
+        PC = PC.get_signed_value_int10()
         byte_0th = self.mem_bytes[PC]
         if PC >= self.rsp_min:
             raise error.AddressError("bad PC: should not read ouside from of instruction mem")

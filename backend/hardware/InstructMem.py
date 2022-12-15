@@ -25,10 +25,12 @@ class InstructMem():
         # set icode and others if applicable
         self.icode = self.data.get_bits(0, 4).get_value_int10()
         self.ifun = self.data.get_bits(4, 8).get_value_int10()
-        if 0 > self.icode or self.icode > 12:
+        if 0 > self.icode or self.icode > 12: # invalid instruction
             raise error.InstructionError('invalid icode')
         if not self._check_validity():
             raise error.InstructionError('invalid instruction')
+        if self.icode == 0: # halt
+            raise error.Halt()
         return self.icode, self.ifun
 
     def _check_validity(self):
@@ -60,7 +62,7 @@ class InstructMem():
             assert 0, 'bad icode'
             return
 
-    def calc_valP(self):
-        return self.len
+    def calc_valP(self, last_PC: Word):
+        return Word(self.len + last_PC.get_signed_value_int10())
 
 

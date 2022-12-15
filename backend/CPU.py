@@ -25,7 +25,7 @@ class CPU():
         # 'artificially' divide instruction men and run-time mem
         self.instruct_mem = InstructMem()
         self.get_ins = get_ins
-        self.PC = 0
+        self.PC = Word(0)
         self._clear_tmp()
         if get_ins == None:  # default: get instructions from memory
             self.get_ins = self.memory.get_ins
@@ -61,7 +61,7 @@ class CPU():
             except error.Halt as e:
                 self.try_cycle()
                 ins = self.get_ins(self.PC)
-                self.icode, self.ifun = self.instruct_mem.update(ins)
+                self.icode, self.ifun = 0, 0
                 self.stat.set(2, self)
                 err_msg = e.err_msg
             except error.AddressError as e:
@@ -93,30 +93,22 @@ class CPU():
         # Whether or not get valC
         ins = self.get_ins(self.PC)
         self.icode, self.ifun = self.instruct_mem.update(ins)
-        
-        if self.icode == 0:
-            raise error.Halt()
-        # get icode and ifun internally
-        # self.icode, self.ifun = self.instruct_mem.fetch()
-
         # rA and rB are the ADDRESSES of the registers and they are INTs!!!
         self.rA, self.rB = self.instruct_mem.get_reg_address()
         # given the current instruction, calculate the next PC,
         # valP is INT!!!!
-        self.valP = self.PC + self.instruct_mem.calc_valP()
-
+        self.valP = self.instruct_mem.calc_valP(self.PC)
         self.valC = self.instruct_mem.get_valC()
         return
 
     def decode_stage(self):
         r1, r2 = decode.select_read_reg_srcs(self)
-
         self.valA, self.valB = self.registers.read_2_ports(r1, r2)
         return
 
     def execute_stage(self):
         op1, op2, operator = execute.select_operation(self)
-
+        # ALU computes cond code as well as valE
         self.valE, cc_info = self.ALU.op64(operator, op1, op2)
         if execute.do_update_cc(self):  # OPq or iaddq
             self.cond_code.set(cc_info)
@@ -127,7 +119,7 @@ class CPU():
     def memory_stage(self):
         write_dest_adr, write_val = memory.select_write(self)
         read_src_adr = memory.select_read(self)
-        # memory adr is a Word, and so is val
+        # memory adr is a Word, and so is write_val
         self.memory.write(write_dest_adr, write_val)
         self.valM = self.memory.read(read_src_adr)
         return
@@ -135,13 +127,13 @@ class CPU():
     def write_back_stage(self):
         reg_adr, val = write_back.select_write_back(self)
         self.registers.write(reg_adr, val)
-
+        # MAY write back twice
         reg_adr, val = write_back.select_write_back_2nd(self)  # popq only
         self.registers.write(reg_adr, val)
         return
 
     def update_PC(self):
-        # PC = ...
+        # PC = valP or other values
         val = update_PC.select_PC_val(self)
         self.PC = val
         return
@@ -183,11 +175,11 @@ class CPU():
             else:
                 print('valM: None')
 
-            print('valP:', self.valP)
+            print('valP:', self.valP.get_str_hex())
             print('rA:', self.rA)
             print('rB:', self.rB)
 
-        print('PC:', hex(self.PC))
+        print('PC:', self.PC.get_str_hex())
 
         if show_regs:
             self.registers.show_regs_hex(show_zero=True)
@@ -198,8 +190,8 @@ class CPU():
     def get_cpu_vals(self):
         vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB]
         for val, i in zip(vals, list(range(len(vals)))):
-            if val is not None and i < 5:
+            if val is not None and i < 6:
                 vals[i] = val.get_str_hex()
-            if i == 5:
+            if i == 6:
                 vals[i] = Word(val).get_str_hex()
         return {'valA':vals[0], 'valB':vals[1], 'valC':vals[2], 'valE':vals[3], 'valM':vals[4], 'valP': vals[5], 'rA':vals[6], 'rB':vals[7]}
