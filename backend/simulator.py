@@ -60,37 +60,15 @@ def run_cpu(cpu:CPU, cycle, debug=False, format='str'):
     
     @param  cycle: boolean, if False, run a single stage
     @return        a dictionary formatted as the project instruction
-                   an error message containing descritions of the specific error happending
+                   an error message containing descriptions of the specific error happening
                       if there's no error, this would be an empty string
                    a dictionary containing tmp values of the CPU, or the signals in the wires I think
                       may contain None variables
     '''
     # empty msg: all good
-    err_msg = ''
-    try:
-        cpu.run(cycle)
-        # update to the state before termination
-    except error.Halt as e:
-        cpu.try_cycle()
-        ins = cpu.get_ins(cpu.PC)
-        cpu.icode, cpu.ifun = cpu.instruct_mem.update(ins)
-        cpu.stat.set(2, cpu)
-        err_msg = e.err_msg
-    except error.AddressError as e:
-        if cpu.debug:
-            print('address out of range!')
-        cpu.try_cycle()
-        cpu.stat.set(3, cpu)
-        err_msg = e.err_msg
-    except error.InstructionError as e:
-        if cpu.debug:
-            print('instruction error:')
-        cpu.stat.set(4, cpu)
-        err_msg = e.err_msg
-    finally:
-        if not cpu.stat.is_ok():
-            if cpu.debug:
-                print('bad stat code, throwing error')
+    err_msg = cpu.run(cycle)
+    # update to the state before termination
+
     return build_json_dic(cpu, format), err_msg, cpu.get_cpu_vals()
 
 def init_cpu(ins:str, debug=False):
@@ -127,7 +105,7 @@ if __name__ == '__main__':
 
     cpu, _, _ = init_cpu(get_ins_from_stdin(), debug=False)
     '''
-    in machine code the value is already stored by little endian....
+    In machine code the value is already stored by little endian....
     val_byte_ls = []
     for i in range(val_start, len(ins_str), 2):
         val_byte_ls.append(Byte('0x' + ins_str[i: i + 2]))
@@ -142,6 +120,9 @@ if __name__ == '__main__':
         # cpu.memory.show_mem()
         # print('\n')
         cpu_info_dict_ls.append(build_json_dic(cpu, format='int'))
+        # Determine termination by the returned err_msg
+        # In fact, the instance of CPU will not run after an error occurs.
+        # see CPU.run for details
         if err_msg != '':
             break
         
