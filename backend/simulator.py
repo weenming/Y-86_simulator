@@ -118,11 +118,14 @@ def init_cpu(ins:str, debug=False):
     if debug:
         print(mem.mem_bytes[0x37].get_str_hex())
     cpu = CPU(mem)
-    return cpu
+    
+    mem_dict = cpu.memory.get_mem_dict(format='str')
+    rsp_min = cpu.memory.rsp_min
+    return cpu, mem_dict, rsp_min
 
 if __name__ == '__main__':
 
-    cpu = init_cpu(get_ins_from_stdin(), debug=False)
+    cpu, _, _ = init_cpu(get_ins_from_stdin(), debug=False)
     '''
     in machine code the value is already stored by little endian....
     val_byte_ls = []

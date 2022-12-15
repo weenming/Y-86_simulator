@@ -3,7 +3,7 @@ from flask import Flask, request, render_template, jsonify, Response
 from werkzeug.utils import secure_filename
 import backend.simulator as sim
 
-global cpu, f_text
+global cpu, f_text, code_dict
 
 ALLOWED_EXTENSIONS = {'yo'}
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__),'upload')
@@ -27,12 +27,15 @@ def upload():
         f_name = secure_filename(f.filename)
         f.save(os.path.join(UPLOAD_FOLDER, f_name))
         
-        global f_text
+        global f_text, code_dict
         code_dict = dict_trans(f_name)
         f_text = sim.get_ins("./upload/" + f_name)
-        cpu = sim.init_cpu(f_text)
+        cpu, mem_dict, rsp_min = sim.init_cpu(f_text)
+        
+        # 这边是后端接口没写好，对传的数据进行进制转换。将一开始的指令内存存进去。
 
-        return jsonify(code_dict)
+
+        return jsonify({"code_dict": code_dict, "MEM": mem_dict, "TEMP": {"rsp_min": rsp_min}})
 
 
 # 读取路径为 './upload/' + file_name 的文件，并通过正则表达式处理，返回字典
@@ -71,8 +74,11 @@ def signal():
         dic, err_msg, reg_file = sim.run_cpu(cpu, False)
         dic.update({'TEMP': reg_file})
     elif signal == 'reset':
-        cpu = sim.init_cpu(f_text)
-        return jsonify(200)
+        cpu, mem_dict, rsp_min = sim.init_cpu(f_text)
+        # 这边是后端接口没写好，对传的数据进行进制转换。将一开始的指令内存存进去。
+        mem_dict = cpu.memory.get_mem_dict(format='str')
+        rsp_min = cpu.memory.rsp_min
+        return jsonify({"code_dict": code_dict, "MEM": mem_dict, "TEMP": {"rsp_min": rsp_min}})
     dic['ERR'] = err_msg
     dic['TEMP']['rsp_min'] = str(cpu.memory.rsp_min)
     # 直接用jsonify会按照键值排序后输出
