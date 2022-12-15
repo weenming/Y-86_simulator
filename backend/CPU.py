@@ -184,10 +184,10 @@ class CPU():
         self.cond_code.show()
 
     def get_cpu_vals(self):
-        vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP]
+        vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB]
         for val, i in zip(vals, list(range(len(vals)))):
-            if val is not None and i != 5:
+            if val is not None and i < 5:
                 vals[i] = val.get_str_hex()
             if i == 5:
                 vals[i] = Word(val).get_str_hex()
-        return {'valA':vals[0], 'valB':vals[1], 'valC':vals[2], 'valE':vals[3], 'valM':vals[4], 'valP': vals[5]}
+        return {'valA':vals[0], 'valB':vals[1], 'valC':vals[2], 'valE':vals[3], 'valM':vals[4], 'valP': vals[5], 'rA':vals[6], 'rB':vals[7]}

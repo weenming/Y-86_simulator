@@ -1,9 +1,181 @@
-table {
-    border: 2px solid black;
-    overflow: scroll;
-    max-height: 300px;
+/* 标题和输入 */
+#top_div {
+    width: 100%;
+    position: absolute;
+}
+#head, #input, #button_div {
+    text-align: center;
+    align-content: center;
+    height: 60px;
+}
+#head {
+    position: absolute;
+    text-align: right;
+    left: 20%;
+    top: 20px;
+}
+#title {
+    display: inline;
+}
+#input {
+    position: absolute;
+    left: 50%;
+    top: 35px;
+}
+#file_fake {
+    text-align: center;
+    position: relative;
+    padding: 4px 10px;
+    width: 80px;
+    height: 30px;
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline;
+}  
+#file {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80px;
+    height: 30px;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    cursor: pointer;
+}
+#button_div {
+    position: absolute;
+    width: 30%;
+    left: 60%;
+    top: 20px;
+}
+#button_div button{
+    text-align: center;
+    height: 30px;
+    margin: 10px;
+    padding: 4px 10px;
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 15px;
+    cursor: pointer;
 }
 
-#highlight {
-    background-color: aqua;
+ 
+
+table {
+    border-collapse:collapse;
+    text-align: center;
+}
+table, th, td{
+    border: 2px solid black;
+    height: 28px;
+    min-width: 50px;
+    font-size: 10px;
+}
+td {
+    border: 1px solid black;
+    font-family: 'consolas';
+}
+
+
+
+/* Top-Aligned */
+#body_div {
+    position: absolute;
+    top: 100px;
+    width: 100%;
+}
+#left, #middle, #right {
+    position: absolute;
+}
+
+
+/* Left */
+#left {
+    width: 50%;
+    left: 2.5%;
+}
+#code_div {
+    font-family: 'consolas';
+    overflow: scroll;
+    width: 100%;
+    max-height: 350px;
+}
+#code_div th, #code_div td{
+    border: 0;
+    height: 30px;
+    min-width: 20px;
+    font-size: 10px;
+    padding-left: 5px;
+}
+#code_div table {
+    text-align: justify;
+    border: 1.5px solid black;
+    width: 100%;
+    max-height: 250px;
+}
+#stage_div {
+    width: 100%;
+}
+
+
+
+/* Middle */
+#middle {
+    width: 20%;
+    left: 55%;
+}
+#reg_div {
+    width: 100%;
+}
+#reg_div table {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+}
+
+
+
+/* Right */
+#right {
+    width: 20%;
+    left: 77.5%;
+}
+#mem_div {
+    overflow: scroll;
+    width: 100%;
+    max-height: 350px;
+}
+#mem_div table {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+}
+#mem_div th{
+    position: sticky;
+    top: 0;
+    background-color: white;
+}
+#small {
+    position: relative;
+    top: 20px;
+    width: 100%;
+}
+#pc_div, #stat_div, #cc_div {
+    position: absolute;
+}
+#cc_div {
+    left: 50%;
+    top:5px;
+}
+#pc_div, #stat_div {
+    left: 7.5%;
+}
+#stat_div {
+    top: 80px;
+}
+#pc_div table, #stat_div table{
+    min-width: 80px;
 }
