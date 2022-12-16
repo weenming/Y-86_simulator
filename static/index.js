@@ -242,7 +242,7 @@ function init() {
 }
 
 // 执行过程中高亮实现
-function highlight(res, option = 'next') {
+function highlight(res, option) {
     // code table第instr_count行高亮
     var instr_count = next_code(res, option)
     var tbl = document.getElementById("code");
@@ -313,7 +313,7 @@ function next_mem(res, option = 'next') {
 
     // 代码段高亮
         // 标记代码段内存最大处
-        let rsp_min = res.TEMP.rsp_min;
+        let rsp_min = res.rsp_min;
 
     // memory代码段最多延申到code_length处
     let code_length = 0;
