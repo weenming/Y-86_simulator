@@ -315,7 +315,7 @@ function mem_frame_set(res) {
     console.log(res.REG.rsp, rsp_init)
     if (rsp_init == 0 && res.REG.rsp != 0)
         rsp_init = res.REG.rsp;
-    if (res.REG.rsp < rsp_init) {
+    if (res.REG.rsp < rsp_init && res.REG.rsp != 0) {
         for (let i in res.MEM) {
             if (i >= Number(res.REG.rsp) && i < Number(rsp_init))
                 $("#mem_" + i).addClass("frame_mem");

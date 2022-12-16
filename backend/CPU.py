@@ -206,6 +206,7 @@ class CPU():
         self.memory = ctx['MEM']
         self.cycle_gen = self.cycle()
         self.cycle_gen.send(None)
+        self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB, self.srcA, self.srcB, self.dstE, self.dstM = [None] * 12
 
     def last_cycle(self):
         if self._history_stack.is_empty():
