@@ -2,6 +2,8 @@ from hardware import *
 from abstraction import *
 from sequence import *
 import error
+import copy
+import utilities.stack as stack
 
 
 class CPU():
@@ -26,11 +28,11 @@ class CPU():
         self.instruct_mem = InstructMem()
         self.get_ins = get_ins
         self.PC = Word(0)
-        self._clear_tmp()
         if get_ins == None:  # default: get instructions from memory
             self.get_ins = self.memory.get_ins
         self.cycle_gen = self.cycle()
         self.cycle_gen.send(None)
+        self._history_stack = stack.stack()
         if self.debug:
             print('CPU init finished')
     
@@ -119,12 +121,13 @@ class CPU():
                         if self.debug:
                             print('bad stat code, throwing error')
                         yield err_msg
+            # update history
+            self._history_stack.push(self._get_ctx())
             # cycle: yield after a whole cycle
             if is_cycle:
                 is_cycle = yield ''
 
-
-
+    # This method is for debugging
     def show_cpu(self, show_values=False, show_regs=False):
         print('ins name:', self.instruct_mem.get_instruction_name())
         if show_values:
@@ -165,6 +168,16 @@ class CPU():
             print('\%rsp:', self.registers.show_rsp())
         self.cond_code.show()
 
+    def build_json_dic(self, format):
+        if format == 'str':  
+            PC = self.PC.get_str_hex()
+        else:
+            # format: int
+            PC = self.PC.get_signed_value_int10()
+        cpu_info = {'PC':PC, 'REG':self.registers.get_reg_dict(format = format), 'CC': self.cond_code.get_CC_dict()\
+            , 'STAT': self.stat.val, 'MEM': self.memory.get_mem_dict(format = format)} # current state of the cpu stored in a python dict
+        return cpu_info
+
     def get_cpu_vals(self):
         vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB, self.srcA, self.srcB, self.dstE, self.dstM]
         names = ['valA', 'valB', 'valC', 'valE', 'valM', 'valP', 'rA', 'rB', 'srcA', 'srcB', 'dstE', 'dstM']
@@ -175,3 +188,25 @@ class CPU():
             else:
                 dic[name] = None
         return dic
+
+    # Load the state of the prev step
+    def _get_ctx(self):
+        ctx = {'PC':copy.deepcopy(self.PC), 'REG':copy.deepcopy(self.registers), 'CC': self.cond_code.get_CC_dict()
+        , 'STAT': self.stat.val, 'MEM': copy.deepcopy(self.memory)}
+        return ctx
+
+    def _load_ctx(self, ctx):
+        self.PC = ctx['PC']
+        self.registers = ctx['REG']
+        self.cond_code.set(ctx['CC'])
+        self.stat.set(ctx['STAT'], self)
+        self.memory = ctx['MEM']
+        self.cycle_gen = self.cycle()
+        self.cycle_gen.send(None)
+
+    def last_cycle(self):
+        if self._history_stack.is_empty():
+            return False
+        else:
+            self._load_ctx(self._history_stack.pop())
+            return True 
