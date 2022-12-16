@@ -102,7 +102,7 @@ if __name__ == '__main__':
     cpu_info_dict_ls = []
 
     while True:
-        execute_msg = input('run for next cycle; prev for prev cycle')
+        execute_msg = input('run for next cycle; prev for prev cycle: ')
         if execute_msg == 'run':
             dic, err_msg, _ = run_cpu(cpu, True)
             print('error message:', err_msg)

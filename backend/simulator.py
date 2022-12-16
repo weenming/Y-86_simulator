@@ -59,7 +59,8 @@ def run_cpu(cpu:CPU, cycle, debug=False, format='str'):
     # empty msg: all good
     err_msg = cpu.run(cycle)
     rsp_min = cpu.memory.rsp_min
-    return cpu.build_json_dic(format).update({"rsp_min":rsp_min}), err_msg, cpu.get_cpu_vals()
+    dic = cpu.build_json_dic(format).update({"rsp_min":rsp_min})
+    return dic, err_msg, cpu.get_cpu_vals()
 
 def init_cpu(ins:str, debug=False):
     '''
