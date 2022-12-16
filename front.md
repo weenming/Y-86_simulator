@@ -21,7 +21,9 @@ $ python setup.py
 - 点击`NEXT INSTRUCTION`按钮，执行一条指令。
 - 点击`NEXT STAGE`按钮，执行一个阶段（共6个阶段：`FETCH`, `DECODE`, `EXECUTE`, `MEMORY`, `WRITE BACK`, `PC UPDATE`）。
 
-运行过程中，左边代码框中会高亮下一条要执行的指令，其余框中会呈现本条指令执行完后各部分的值。此外，中间寄存器框中会高亮本条指令或本阶段执行中所涉及的寄存器；右边内存框的底部高亮了写入了指令代码的内存。
+![executing](static/images/executing.png)
+运行过程中，左边代码框中会高亮即将要执行或执行中的指令，其余框中会呈现某一阶段或一条指令执行完后各部分的值。此外，其余框内会高亮发生变化的部分。在内存框中，额外高亮了栈帧内存和代码内存。
+注意，内存框中的地址是8字节最低位的地址。
 
 
 ### 3. 具体实现
@@ -43,24 +45,24 @@ $ python setup.py
 类似地，点击`NEXT INSTRUCTION`, `NEXT STAGE`, `RESET`按钮后，前端传给后端json格式的数据，记为`{'signal': signal}`，根据按钮的不同，传的`signal`字符串的内容不同。后端可以对该数据进行处理，同样返回携带json数据的响应到前端。
 
 
-#### 前端JavaScript处理
+#### 前端数据处理
 
 前端利用后端传入的数据，执行对应JavaScript脚本。
 
-`content(input, flag)`和`init()`函数
+`content()`和`init()`函数
 将传入的json数据，通过`id`选择对应的元素，写入HTML，即可完成内容的更改。
-`content`函数根据对应`flag`，编写并返回对应的元素的HTML字符串。
+`content()`函数根据对应`flag`，直接编写对应的元素的HTML字符串，在利用jQuery选中该元素，修改其HTML内容。
 
-`highlight(res)`函数
-用于执行过程中高亮实现。
-`next_code`, `next_register`和`next_mem`返回需要高亮的行数`line`(类型可以为数字`number`或对象(数组)`object`)。三者分别返回
-- `next_code`: 下一步指令的行
-- `next_register`: 本步涉及的寄存器的行
-- `next_mem`: 内存区代码段的行
+#### 前端高亮实现
 
-`sub_highlight(tbl, line)`则设置对应的`tbl`元素中第`line`行的背景。
+代码块的高亮
+利用`code_highlight()`函数实现。
+首先调用`next_code()`函数，对比实际`PC`和代码中的`PC`得到即将执行语句的行标，再利用jQuery的选择器，选择特定行，更改背景。
 
+其余部分的改变的部分高亮
+先存储之前的返回`last_res`，再将`last_res`和`res`中的内容进行比较：发生变化的，在`content()`函数中更改HTML，标记其为`class="changed"`类；未发生变化的，标记其为`class="unchanged"`类。再利用jQuery分别设定每类的背景颜色。
 
-#### 前端其余处理
-
-通过几个`div`将页面划分成几个部分，分别设置对应大小、颜色等样式。利用CSS伪类，选择表格的奇偶行，分别设置背景。
+`Memory`部分高亮
+在`content()`函数中，直接更改每一行的HTML，设置其`id`为`id=mem_XX`。其中`XX`是对应行的10进制地址值。
+代码段高亮：传入的数据中包含`rsp`可以达到的最小值`rsp_min`，这也就是代码段的最大值。再利用`id`遍历内存，将小于`rsp_min`的标记为`class="code_mem"`类。再设置背景颜色。
+栈帧段高亮：`rsp`初始值为`rsp_init`，若未设定，则`rsp_init = 0`。当当前的`rsp`小于`rsp_init`时，则认为该值为栈底。再利用`id`遍历内存，将介于这两者之间的标记为`class="frame_mem"`类。再设置背景颜色。

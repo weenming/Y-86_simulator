@@ -1,5 +1,5 @@
 import os, re, json
-from flask import Flask, request, render_template, jsonify, Response
+from flask import Flask, request, render_template, Response
 from werkzeug.utils import secure_filename
 import backend.simulator as sim
 
@@ -74,7 +74,6 @@ def signal():
     elif signal == 'reset':
         cpu, dic, err_msg, reg_file = sim.init_cpu(f_text)
     
-    print(dic)
     dic.update({'TEMP': reg_file})
     dic['ERR'] = err_msg
     dic['rsp_min'] = str(cpu.memory.rsp_min)

@@ -62,13 +62,14 @@ td {
     font-family: 'consolas';
 }
 th {
-    background-color: #46a4ff;
+    background-color: rgb(98,175,255);
+    padding-bottom: 1px;
 }
 table tr:nth-child(even) {
-    background-color: #1e90ff26;
+    background-color: rgb(221,238,255);
 }
 table tr:nth-child(odd) {
-    background-color: #1e90ff4d;
+    background-color: rgb(188,221,255);
 }
 
 
@@ -240,7 +241,7 @@ table tr:nth-child(odd) {
 }
 #cc_div {
     left: 50%;
-    top:5px;
+    top: 10px
 }
 #pc_div, #stat_div {
     left: 7.5%;
