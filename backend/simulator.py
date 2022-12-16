@@ -6,6 +6,11 @@ import error
 import re
 import fileinput
 import json
+import copy
+
+# class stack:
+#     def __init__(self):
+
 
 def get_ins(fname):
     with open(fname, 'r') as f:
@@ -89,12 +94,7 @@ def init_cpu(ins:str, debug=False):
             byte_ls.append(Byte(0x0))
         for i in range(0, len(ins_str), 2):
             byte_ls.append(Byte('0x' + ins_str[i: i + 2]))
-    if debug:
-        print([byte.get_str_hex() for byte in byte_ls])
-        print(len(byte_ls))
     mem = Memory(byte_ls)
-    if debug:
-        print(mem.mem_bytes[0x37].get_str_hex())
     cpu = CPU(mem)
     
     mem_dict = cpu.memory.get_mem_dict(format='str')

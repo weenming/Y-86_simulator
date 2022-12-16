@@ -72,6 +72,7 @@ class Registers():
 
     def show_rsp(self):
         return self.regs[self.get_rsp()].get_str_hex()
+    
     @classmethod
     def get_null_adr(self):
         return Byte(15)
