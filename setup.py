@@ -31,7 +31,7 @@ def upload():
         code_dict = dict_trans(f_name)
         f_text = sim.get_ins("./upload/" + f_name)
         cpu, mem_dict, rsp_min = sim.init_cpu(f_text)
-
+        
         return jsonify({"code_dict": code_dict, "MEM": mem_dict, "TEMP": {"rsp_min": rsp_min}})
 
 
