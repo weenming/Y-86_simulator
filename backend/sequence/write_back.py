@@ -1,31 +1,21 @@
 from abstraction import *
 
-
 def select_write_back(cpu):
+    null_adr = cpu.registers.get_null_adr()
+    rsp_adr = cpu.registers.get_rsp_adr()
     if cpu.icode in [3, 6, 12]:
-        return cpu.rB, cpu.valE
+        return cpu.rB, null_adr
     elif cpu.icode == 2:
         if cpu.ifun == 0 or cpu.cnd == 1:
-            return cpu.rB, cpu.valE
+            return null_adr, cpu.rB
         else:
-            return None, None
+            return null_adr, null_adr
     elif cpu.icode == 5:  # mrmovq
-        return cpu.rA, cpu.valM
-    elif cpu.icode in [8, 9, 10, 11]:
-        return cpu.registers.get_rsp(), cpu.valE
+        return cpu.rA, null_adr
+    elif cpu.icode in [8, 9, 10]:
+        return null_adr, rsp_adr
+    elif cpu.icode in [11]:
+        return cpu.rA, rsp_adr
     elif cpu.icode in [0, 1, 4, 7]:  # hlt, nop, rmmovq, jXX
-        return None, None
+        return null_adr, null_adr
     return
-
-
-def do_write_back_two(cpu):
-    if cpu.icode == 11:
-        return True
-
-
-def select_write_back_2nd(cpu):
-    if cpu.icode == 11:
-        return cpu.rA, cpu.valM
-
-    else:
-        return None, None

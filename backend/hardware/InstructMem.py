@@ -2,6 +2,7 @@ import sys
 sys.path.append("./")
 
 from abstraction import *
+import hardware.Registers
 import error
 
 
@@ -55,9 +56,9 @@ class InstructMem():
         if self.icode in [2, 3, 4, 5, 6, 10, 11, 12]:
             rA = self.data.get_bits(8, 12).get_value_int10()
             rB = self.data.get_bits(12, 16).get_value_int10()
-            return rA, rB
+            return Byte(rA), Byte(rB)
         elif self.icode in [0, 1, 7, 8, 9]:
-            return 15, 15
+            return hardware.Registers.get_null_adr(), hardware.Registers.get_null_adr()
         else:
             assert 0, 'bad icode'
             return

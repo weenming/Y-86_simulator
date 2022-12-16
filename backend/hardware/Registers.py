@@ -12,8 +12,8 @@ class Registers():
         self.regs = []
         for _ in range(15):
             self.regs.append(Word(0))
-        # rsp should be set to 0x0?
-        self.write(self.get_rsp(), Word(0))
+        # rsp should be initialized to 0x0?
+        self._write(self.get_rsp_adr(), Word(0))
 
     def show_regs(self):
         for reg in self.regs:
@@ -26,11 +26,12 @@ class Registers():
                 print(f'{self.names[i]}({i}):', self.regs[i].get_str_hex())
         return
 
-    def _read(self, address):
+    def _read(self, address:Byte):
         '''
         Returns a Word type data
         '''
-        if address is None or address == 15:
+        address = address.get_value_int10()
+        if  address == 15:
             # skip or access no reg
             return Word(0)
         
@@ -47,11 +48,12 @@ class Registers():
         '''
         return self._read(address1), self._read(address2)
 
-    def write(self, address, val):
+    def _write(self, address:Byte, val):
         '''
          val should both be Word type.
         '''
-        if val is None or address is None or address == 15:
+        address = address.get_value_int10()
+        if address == 15:
             # skip or access no reg
             return False
         # invalid reg adr
@@ -60,11 +62,19 @@ class Registers():
         self.regs[address] = val
         return True
 
-    def get_rsp(self):
-        return 4
+    def write_2_ports(self, adr1:Byte, adr2:Byte, val1:Word, val2:Word):
+        self._write(adr1, val1)
+        self._write(adr2, val2)
+
+    @classmethod
+    def get_rsp_adr(self):
+        return Byte(4)
 
     def show_rsp(self):
         return self.regs[self.get_rsp()].get_str_hex()
+    @classmethod
+    def get_null_adr(self):
+        return Byte(15)
 
     def get_reg_dict(self, format='int'):
         d = {}

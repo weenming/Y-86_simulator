@@ -91,8 +91,8 @@ class CPU():
         return
 
     def decode_stage(self):
-        r1, r2 = decode.select_read_reg_srcs(self)
-        self.valA, self.valB = self.registers.read_2_ports(r1, r2)
+        self.srcA, self.srcB = decode.select_read_reg_srcs(self)
+        self.valA, self.valB = self.registers.read_2_ports(self.srcA, self.srcB)
         return
 
     def execute_stage(self):
@@ -114,11 +114,8 @@ class CPU():
         return
 
     def write_back_stage(self):
-        reg_adr, val = write_back.select_write_back(self)
-        self.registers.write(reg_adr, val)
-        # MAY write back twice
-        reg_adr, val = write_back.select_write_back_2nd(self)  # popq only
-        self.registers.write(reg_adr, val)
+        self.dstE, self.dstM = write_back.select_write_back(self)
+        self.registers.write_2_ports(self.dstE, self.dstM, self.valE, self.valM)
         return
 
     def update_PC(self):
@@ -165,8 +162,8 @@ class CPU():
                 print('valM: None')
 
             print('valP:', self.valP.get_str_hex())
-            print('rA:', self.rA)
-            print('rB:', self.rB)
+            print('rA:', self.rA.get_str_hex())
+            print('rB:', self.rB.get_str_hex())
 
         print('PC:', self.PC.get_str_hex())
 
@@ -181,6 +178,4 @@ class CPU():
         for val, i in zip(vals, list(range(len(vals)))):
             if val is not None and i < 6:
                 vals[i] = val.get_str_hex()
-            if i == 6:
-                vals[i] = Word(val).get_str_hex()
         return {'valA':vals[0], 'valB':vals[1], 'valC':vals[2], 'valE':vals[3], 'valM':vals[4], 'valP': vals[5], 'rA':vals[6], 'rB':vals[7]}
