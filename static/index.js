@@ -5,6 +5,8 @@ const REGISTER_LIST = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi', '
 const CC_LIST = ['ZF', 'SF', 'OF']
 const STAGE_NAME = ['FETCH', 'DECODE', 'EXECUTE', 'MEMORY', 'WRITE BACK', 'PC UPDATE']
 var run_flag = 0;
+var rsp_init = 0;     // rsp初始值
+var last_res;    // 上一步的字典
 
 
 function upload(){
@@ -18,6 +20,7 @@ function upload(){
         processData: false,
         success: function(res){     // response 回调函数
             code_dict = res.code_dict;
+            last_res = res;
             init();
             $("#code").html(content(code_dict, 0));
             $("#memory").html(content(res, 5))
@@ -77,6 +80,7 @@ function reset(){
             $("#memory").html(content(res, 5))
             highlight(res, 'init');
             run_flag = 1;
+            last_res = res;
         }
     })
 }
@@ -90,10 +94,12 @@ function update(res){
     $("#memory").html(content(res, 5));
     $("#stage").html(content(res, 6));
     highlight(res, 'next');
+    $(".changed").css("background-color", "red");
     if (res.ERR != ''){
         alert(res.ERR);
     }
     run_flag = res.STAT;
+    last_res = res;
 }
 
 // js写入HTML
@@ -104,7 +110,7 @@ function content(input, flag){
             // code table, input=code_dict
             str = '';
             let rows = input.length;
-            for (let i = 0; i < rows; i++){
+            for (let i = 0; i < rows; i++) {
                 let l = input[i];
                 str += "<tr> <td>" + l.line + "</td> <td>" + l.text;
             }
@@ -114,14 +120,20 @@ function content(input, flag){
             // register table
             str = "<tr> <th>Registers</th> <th>Value</th> </tr>";
             for (let i in input.REG){
-                str += "<tr> <td>" + i + "</td> <td>" + full_str(input.REG[i]) + "</td> </tr>";
+                if (last_res.REG[i] != input.REG[i])
+                    str += "<tr class='changed'> <td>" + i + "</td> <td>" + full_str(input.REG[i]) + "</td> </tr>";
+                else 
+                    str += "<tr class='unchanged'> <td>" + i + "</td> <td>" + full_str(input.REG[i]) + "</td> </tr>";
             }
             break;
         }
         case 2: {
             // PC table
             str = "<tr> <th>PC</th> </tr>";
-            str += "<tr> <td>" + full_str(input.PC, 3) + "</td> </tr>";
+            if (last_res.PC != input.PC)
+                str += "<tr class='changed'> <td>" + full_str(input.PC, 3) + "</td> </tr>";
+            else 
+                str += "<tr class='unchanged'> <td>" + full_str(input.PC, 3) + "</td> </tr>";
             break;
         }
         case 3: {
@@ -130,12 +142,22 @@ function content(input, flag){
             for (let i in input.CC){
                 str += "<tr> <td>" + i + "</td> <td>" + input.CC[i] + "</td> </tr>";
             }
+            for (let i in input.CC){
+                if (last_res.CC[i] != input.CC[i])
+                    str += "<tr class='changed'> <td>" + i + "</td> <td>" + input.CC[i] + "</td> </tr>";
+                else 
+                    str += "<tr class='unchanged'> <td>" + i + "</td> <td>" + input.CC[i] + "</td> </tr>";
+            }
             break;
         }
         case 4: {
             // stat table
             str = "<tr> <th>Stat</th> </tr>";
             str += "<tr> <td>" + input.STAT + "</td> </tr>";
+            if (last_res.STAT != input.STAT)
+                str += "<tr class='changed'> <td>" + input.STAT + "</td> </tr>";
+            else 
+                str += "<tr class='unchanged'> <td>" + input.STAT + "</td> </tr>";
             break;
         }
         case 5: {
@@ -147,9 +169,15 @@ function content(input, flag){
 
             // memory输出
             for (let i = length - 1; i >= 0; i --){
-                let addr = '0x' + Number(mem_arr[i][0]).toString(16); 
+                let addr_int = Number(mem_arr[i][0])
+                let addr_hex = '0x' + addr_int.toString(16); 
                 let val = mem_arr[i][1];
-                str += "<tr> <td>" + full_str(addr, 3) + "</td> <td>" + full_str(val) + "</td> </tr>";
+                let cls;
+                if (last_res.MEM[addr_int] != val)
+                    cls = "changed";
+                else 
+                    cls = "unchanged"
+                str += "<tr id='mem_" + addr_int + "' class='" + cls + "'> <td>" + full_str(addr_hex, 3) + "</td> <td>" + full_str(val) + "</td> </tr>";
             }
             break;
         }
@@ -219,19 +247,20 @@ function highlight(res, option='next') {
     var tbl = document.getElementById("code");
     sub_highlight(tbl, instr_count - 1)
     
-    if (option == 'next'){
-        // register table第[line]行高亮
-        line = next_register(res);
-        tbl = document.getElementById("register");
-        sub_highlight(tbl, line);
-    }
+    // if (option == 'next'){
+    //     // register table第[line]行高亮
+    //     line = next_register(res);
+    //     tbl = document.getElementById("register");
+    //     sub_highlight(tbl, line);
+    // }
 
     // memory table代码段高亮
-    line = next_mem(res, option='init')
+    line = next_mem(res, option)
     tbl = document.getElementById("memory");
     sub_highlight(tbl, line);
 
 }
+
 
 // 得到code table高亮的行
 function next_code(res, option='next'){
@@ -259,28 +288,29 @@ function next_code(res, option='next'){
     return instr_count
 }
 
-// 得到register table高亮的行
-function next_register(res){
-    // 若有15，不返回F寄存器
-    if (res.TEMP.rA == 15 && res.TEMP.rB == 15) {
-        return [];
-    }
-    else if (res.TEMP.rA != 15 && res.TEMP.rB == 15) {
-        return res.TEMP.rA + 1;
-    }
-    else if (res.TEMP.rA == 15 && res.TEMP.rB != 15) {
-        return res.TEMP.rB + 1;
-    }
-    else 
-        return [res.TEMP.rA + 1, res.TEMP.rB + 1];
-}
+
+// // 得到register table高亮的行
+// function next_register(res){
+//     // 若有15，不返回F寄存器
+//     if (res.TEMP.srcA == 15 && res.TEMP.srcB == 15) {
+//         return [];
+//     }
+//     else if (res.TEMP.srcA != 15 && res.TEMP.srcB == 15) {
+//         return res.TEMP.srcA + 1;
+//     }
+//     else if (res.TEMP.srcA == 15 && res.TEMP.srcB != 15) {
+//         return res.TEMP.srcB + 1;
+//     }
+//     else 
+//         return [res.TEMP.srcA + 1, res.TEMP.srcB + 1];
+// }
 
 // 得到memory table高亮的行
 function next_mem(res, option='next'){
     let mem_arr = Object.entries(res.MEM);
     let rows = mem_arr.length;
+
     // 代码段高亮
-    
         // 标记代码段内存最大处
         let rsp_min = res.TEMP.rsp_min;
 
@@ -297,7 +327,25 @@ function next_mem(res, option='next'){
         for (i = 0; i < code_length; i++) {
             line[i] = rows - code_length + i + 1
         }
-        return line
+
+    // 栈帧段高亮
+    // if (option == 'next') {
+    //     // 判断是否初始化或赋予初始值
+    //     if (rsp_init == 0 && res.REG.rsp != 0)
+    //         rsp_init = res.REG.rsp;
+    //         console.log([rsp_init, res.REG.rsp]);
+    //         Number(res.REG.rsp)
+    //     for (i = 0; i < rows; i++) {
+    //         if (res.REG.rsp < rsp_init) {
+    //             a = rows - code_length + i + 1
+    //             line.unshift(i + 1);
+    //         }
+    //         if (Number(mem_arr[i]) == Number(res.REG.rsp)) 
+    //             break;
+    //     }
+    // }
+
+    return line
 
 
 }
@@ -344,3 +392,4 @@ function full_str(str, len=16){
     }
     else return '0x ' + num_full
 }
+

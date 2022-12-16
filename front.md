@@ -13,8 +13,10 @@ $ python setup.py
 
 ### 2. 页面介绍
 
+![preview](/static/images/preview.png)
 点击`UPLOAD`按钮，上传需要模拟运行的文件。
 
+![uploaded](static/images/uploaded.png)
 运行分为两种模式：
 - 点击`NEXT INSTRUCTION`按钮，执行一条指令。
 - 点击`NEXT STAGE`按钮，执行一个阶段（共6个阶段：`FETCH`, `DECODE`, `EXECUTE`, `MEMORY`, `WRITE BACK`, `PC UPDATE`）。
