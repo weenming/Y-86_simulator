@@ -83,7 +83,9 @@ def init_cpu(ins:str, debug=False):
     cpu = CPU(mem)
     
     rsp_min = cpu.memory.rsp_min
-    return cpu, cpu.build_json_dic(format).update({"rsp_min":rsp_min}), err_msg, cpu.get_cpu_vals()
+    dic = cpu.build_json_dic('str')
+    dic.update({"rsp_min":rsp_min})
+    return cpu, dic, '', cpu.get_cpu_vals()
 
 def last_step(cpu:CPU):
     # load last cycle!

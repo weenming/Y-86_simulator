@@ -179,7 +179,10 @@ class CPU():
         return cpu_info
 
     def get_cpu_vals(self):
-        vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB, self.srcA, self.srcB, self.dstE, self.dstM]
+        try:
+            vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB, self.srcA, self.srcB, self.dstE, self.dstM]
+        except:
+            vals = [None] * 12
         names = ['valA', 'valB', 'valC', 'valE', 'valM', 'valP', 'rA', 'rB', 'srcA', 'srcB', 'dstE', 'dstM']
         dic = {}
         for name, val in zip(names, vals):
