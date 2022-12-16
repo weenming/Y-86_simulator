@@ -9,7 +9,7 @@ var rsp_init = 0;     // rsp初始值
 var last_res;    // 上一步的字典
 
 
-function upload(){
+function upload() {
     var file = new FormData();
     file.append("file", $("#file")[0].files[0]);
     $.ajax({
@@ -18,7 +18,7 @@ function upload(){
         data: file,
         contentType: false,
         processData: false,
-        success: function(res){     // response 回调函数
+        success: function (res) {     // response 回调函数
             code_dict = res.code_dict;
             last_res = res;
             init();
@@ -32,28 +32,29 @@ function upload(){
 
 
 // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
-function next(signal){
+function next(signal) {
+    console.log(run_flag)
     switch (run_flag) {
-        case 0: 
+        case 0:
             alert("ALERT: You should upload files first!"); break;
         case 1: {
             // 执行一条指令
             if (signal == 'instr') {
                 $.ajax({
                     url: 'signal/',
-                    data: {'signal': signal},
-                    success: function(res){
+                    data: { 'signal': signal },
+                    success: function (res) {
                         stage = 0;
                         update(res);
                     }
                 })
             }
             // 执行特定一阶段(fetch, decode, excute, memory, write back, PC update)
-            else if (signal == 'stage'){
+            else if (signal == 'stage') {
                 $.ajax({
                     url: 'signal/',
-                    data: {'signal': signal},
-                    success: function(res){
+                    data: { 'signal': signal },
+                    success: function (res) {
                         stage++;
                         if (stage >= 6) stage -= 6;
                         update(res);
@@ -70,11 +71,11 @@ function next(signal){
 
 
 // 重置
-function reset(){
+function reset() {
     $.ajax({
         url: 'signal/',
-        data: {'signal': 'reset'},    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
-        success: function(res){
+        data: { 'signal': 'reset' },    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
+        success: function (res) {
             init();
             $("#code").html(content(code_dict, 0));
             $("#memory").html(content(res, 5))
@@ -86,7 +87,7 @@ function reset(){
 }
 
 // 执行完一步后更新
-function update(res){
+function update(res) {
     $("#register").html(content(res, 1));
     $("#pc").html(content(res, 2));
     $("#cc").html(content(res, 3));
@@ -103,9 +104,9 @@ function update(res){
 }
 
 // js写入HTML
-function content(input, flag){
+function content(input, flag) {
     let str;
-    switch (flag){
+    switch (flag) {
         case 0: {
             // code table, input=code_dict
             str = '';
@@ -139,7 +140,7 @@ function content(input, flag){
         case 3: {
             // CC table
             str = "<tr> <th colspan='2'>CC</th> </tr>";
-            for (let i in input.CC){
+            for (let i in input.CC) {
                 str += "<tr> <td>" + i + "</td> <td>" + input.CC[i] + "</td> </tr>";
             }
             for (let i in input.CC){
@@ -184,14 +185,14 @@ function content(input, flag){
         case 6: {
             // stage table
             str = "<tr> <th>Next Stage</th> <th>" + STAGE_NAME[stage] + "</th> </tr>" +
-                  "<tr> <td>rA</td> <td>" + REGISTER_LIST[input.TEMP.rA] + "</td> </tr>" +
-                  "<tr> <td>rB</td> <td>" + REGISTER_LIST[input.TEMP.rB] + "</td> </tr>" +
-                  "<tr> <td>valA</td> <td>" + full_str(input.TEMP.valA) + "</td> </tr>" +
-                  "<tr> <td>valB</td> <td>" + full_str(input.TEMP.valB) + "</td> </tr>" +
-                  "<tr> <td>valC</td> <td>" + full_str(input.TEMP.valC) + "</td> </tr>" +
-                  "<tr> <td>valE</td> <td>" + full_str(input.TEMP.valE) + "</td> </tr>" +
-                  "<tr> <td>valM</td> <td>" + full_str(input.TEMP.valM) + "</td> </tr>" +
-                  "<tr> <td>valP</td> <td>" + full_str(input.TEMP.valP) + "</td> </tr>";
+                "<tr> <td>rA</td> <td>" + REGISTER_LIST[input.TEMP.rA] + "</td> </tr>" +
+                "<tr> <td>rB</td> <td>" + REGISTER_LIST[input.TEMP.rB] + "</td> </tr>" +
+                "<tr> <td>valA</td> <td>" + full_str(input.TEMP.valA) + "</td> </tr>" +
+                "<tr> <td>valB</td> <td>" + full_str(input.TEMP.valB) + "</td> </tr>" +
+                "<tr> <td>valC</td> <td>" + full_str(input.TEMP.valC) + "</td> </tr>" +
+                "<tr> <td>valE</td> <td>" + full_str(input.TEMP.valE) + "</td> </tr>" +
+                "<tr> <td>valM</td> <td>" + full_str(input.TEMP.valM) + "</td> </tr>" +
+                "<tr> <td>valP</td> <td>" + full_str(input.TEMP.valP) + "</td> </tr>";
             break;
         }
         default: str = ''
@@ -199,28 +200,28 @@ function content(input, flag){
     return str;
 }
 
-function init(){
+function init() {
     // code table
     let str = "<tr> <td></td> </tr>";
     let foo = "<tr> <td></td> </tr>";
     $("#code").html(str + foo + foo + foo + foo + foo + foo + foo + foo + foo);
-    
+
     // register table
     str = "<tr> <th>Registers</th> <th>Value</th> </tr>";
     let length = REGISTER_LIST.length - 1
-    for (let i = 0; i < length; i++){
+    for (let i = 0; i < length; i++) {
         str += "<tr> <td>" + REGISTER_LIST[i] + "</td> <td>" + full_str(0) + "</td> </tr>"
     }
     $("#register").html(str);
 
     // pc table
-    str = "<tr> <th>PC</th> </tr>" + "<tr> <td>" + full_str(0,3) + "</td> </tr>"
+    str = "<tr> <th>PC</th> </tr>" + "<tr> <td>" + full_str(0, 3) + "</td> </tr>"
     $("#pc").html(str);
-    
+
     // cc table
     str = "<tr> <th colspan='2'>CC</th> </tr>";
     length = CC_LIST.length
-    for (let i = 0; i < length; i++){
+    for (let i = 0; i < length; i++) {
         str += "<tr> <td>" + CC_LIST[i] + "</td> <td>" + 0 + "</td> </tr>"
     }
     $("#cc").html(str);
@@ -241,7 +242,7 @@ function init(){
 }
 
 // 执行过程中高亮实现
-function highlight(res, option='next') {
+function highlight(res, option = 'next') {
     // code table第instr_count行高亮
     var instr_count = next_code(res, option)
     var tbl = document.getElementById("code");
@@ -263,23 +264,23 @@ function highlight(res, option='next') {
 
 
 // 得到code table高亮的行
-function next_code(res, option='next'){
+function next_code(res, option = 'next') {
     var instr_count;
     // 下一步的高亮
-    if (option == 'next'){
-        for (var i in code_dict){
+    if (option == 'next') {
+        for (var i in code_dict) {
             var elem = code_dict[i];
-            if (parseInt(elem.pc) == res.PC && elem.code != ''){
+            if (parseInt(elem.pc) == res.PC && elem.code != '') {
                 instr_count = elem.line;
                 break;
             }
         }
     }
     // 初始行
-    else if (option == 'init'){
-        for (var i in code_dict){
+    else if (option == 'init') {
+        for (var i in code_dict) {
             var elem = code_dict[i];
-            if (elem.pc != '' && elem.code != ''){
+            if (elem.pc != '' && elem.code != '') {
                 instr_count = elem.line;
                 break;
             }
@@ -306,7 +307,7 @@ function next_code(res, option='next'){
 // }
 
 // 得到memory table高亮的行
-function next_mem(res, option='next'){
+function next_mem(res, option = 'next') {
     let mem_arr = Object.entries(res.MEM);
     let rows = mem_arr.length;
 
@@ -314,13 +315,13 @@ function next_mem(res, option='next'){
         // 标记代码段内存最大处
         let rsp_min = res.TEMP.rsp_min;
 
-        // memory代码段最多延申到code_length处
-        let code_length = 0;
-        while(1) {
-            if (mem_arr[code_length][0] == rsp_min || code_length == rows)
-                break;
-            else code_length++;
-        }
+    // memory代码段最多延申到code_length处
+    let code_length = 0;
+    while (1) {
+        if (mem_arr[code_length][0] == rsp_min || code_length == rows)
+            break;
+        else code_length++;
+    }
 
         // 代码段
         line = Array(code_length)
@@ -350,15 +351,14 @@ function next_mem(res, option='next'){
 
 }
 
-function sub_highlight(tbl, line, cover=true, color="rgba(30, 255, 150, 0.5)", 
-            color1="rgba(30, 144, 255, 0.15)", color2="rgba(30, 144, 255, 0.3)") 
-{
+function sub_highlight(tbl, line, cover = true, color = "rgba(30, 255, 150, 0.5)",
+    color1 = "rgba(30, 144, 255, 0.15)", color2 = "rgba(30, 144, 255, 0.3)") {
     var trs = tbl.getElementsByTagName("tr");
     let rows = trs.length;
 
     if (cover) {
         for (let i = 0; i < rows; i++) {
-            if (i % 2 == 0){
+            if (i % 2 == 0) {
                 trs[i].style.background = color2;
             }
             else {
@@ -366,10 +366,10 @@ function sub_highlight(tbl, line, cover=true, color="rgba(30, 255, 150, 0.5)",
             }
         }
     }
-    if (typeof(line) == 'number') {
+    if (typeof (line) == 'number') {
         trs[line].style.background = color;
     }
-    else if (typeof(line) == 'object') {
+    else if (typeof (line) == 'object') {
         let length = line.length;
         for (let i = 0; i < length; i++) {
             trs[line[i]].style.background = color;
@@ -380,14 +380,14 @@ function sub_highlight(tbl, line, cover=true, color="rgba(30, 255, 150, 0.5)",
 
 
 // 补齐16进制数字并大写，四位隔开
-function full_str(str, len=16){
+function full_str(str, len = 16) {
     if (str == null) return '/';
     var substr = String(str).slice(2)
     var num = substr.toUpperCase();
     var num_full = num.padStart(len, 0)
-    if (len == 16){
-        let num_sep = num_full.slice(0,4) + ' ' + num_full.slice(4,8) + ' '
-                    + num_full.slice(8,12) + ' ' + num_full.slice(12,16)
+    if (len == 16) {
+        let num_sep = num_full.slice(0, 4) + ' ' + num_full.slice(4, 8) + ' '
+            + num_full.slice(8, 12) + ' ' + num_full.slice(12, 16)
         return '0x ' + num_sep
     }
     else return '0x ' + num_full

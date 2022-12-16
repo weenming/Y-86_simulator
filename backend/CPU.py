@@ -2,6 +2,8 @@ from hardware import *
 from abstraction import *
 from sequence import *
 import error
+import copy
+import utilities.stack as stack
 
 
 class CPU():
@@ -25,61 +27,15 @@ class CPU():
         # 'artificially' divide instruction men and run-time mem
         self.instruct_mem = InstructMem()
         self.get_ins = get_ins
-        self.PC = 0
-        self._clear_tmp()
+        self.PC = Word(0)
         if get_ins == None:  # default: get instructions from memory
             self.get_ins = self.memory.get_ins
         self.cycle_gen = self.cycle()
         self.cycle_gen.send(None)
+        self._history_stack = stack.stack()
         if self.debug:
             print('CPU init finished')
     
-    def try_cycle(self):
-        stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
-              self.write_back_stage, self.update_PC]
-        while True:
-            for stage in stages:
-                try:
-                    stage()
-                except:
-                    return
-
-    def cycle(self):
-        # when trying to run the cpu with an error stat code, raise error.
-        is_cycle = yield ''
-        stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
-              self.write_back_stage, self.update_PC]
-        while True:
-            try:
-                for stage in stages:
-                    stage()
-                    if not is_cycle:
-                        is_cycle = yield ''
-                # cycle: yield after a whole cycle
-                if is_cycle:
-                    is_cycle = yield ''
-            except error.Halt as e:
-                self.try_cycle()
-                ins = self.get_ins(self.PC)
-                self.icode, self.ifun = self.instruct_mem.update(ins)
-                self.stat.set(2, self)
-                err_msg = e.err_msg
-            except error.AddressError as e:
-                if self.debug:
-                    print('address out of range!', e.err_msg)
-                self.try_cycle()
-                self.stat.set(3, self)
-                err_msg = e.err_msg
-            except error.InstructionError as e:
-                if self.debug:
-                    print('instruction error:', e.err_msg)
-                self.stat.set(4, self)
-                err_msg = e.err_msg
-            finally:
-                if not self.stat.is_ok():
-                    if self.debug:
-                        print('bad stat code, throwing error')
-                    yield err_msg
 
     def run(self, cycle=True):
         # if not cycle, execute step by step
@@ -93,31 +49,22 @@ class CPU():
         # Whether or not get valC
         ins = self.get_ins(self.PC)
         self.icode, self.ifun = self.instruct_mem.update(ins)
-        
-        if self.icode == 0:
-            raise error.Halt()
-        # get icode and ifun internally
-        # self.icode, self.ifun = self.instruct_mem.fetch()
-
         # rA and rB are the ADDRESSES of the registers and they are INTs!!!
         self.rA, self.rB = self.instruct_mem.get_reg_address()
         # given the current instruction, calculate the next PC,
         # valP is INT!!!!
-        self.valP = self.PC + self.instruct_mem.calc_valP()
-
+        self.valP = self.instruct_mem.calc_valP(self.PC)
         self.valC = self.instruct_mem.get_valC()
         return
 
     def decode_stage(self):
-        r1, r2 = decode.select_read_reg_srcs(self)
-
-        self.valA = self.registers.read(r1)
-        self.valB = self.registers.read(r2)
+        self.srcA, self.srcB = decode.select_read_reg_srcs(self)
+        self.valA, self.valB = self.registers.read_2_ports(self.srcA, self.srcB)
         return
 
     def execute_stage(self):
         op1, op2, operator = execute.select_operation(self)
-
+        # ALU computes cond code as well as valE
         self.valE, cc_info = self.ALU.op64(operator, op1, op2)
         if execute.do_update_cc(self):  # OPq or iaddq
             self.cond_code.set(cc_info)
@@ -128,34 +75,59 @@ class CPU():
     def memory_stage(self):
         write_dest_adr, write_val = memory.select_write(self)
         read_src_adr = memory.select_read(self)
-        # memory adr is a Word, and so is val
+        # memory adr is a Word, and so is write_val
         self.memory.write(write_dest_adr, write_val)
         self.valM = self.memory.read(read_src_adr)
         return
 
     def write_back_stage(self):
-        reg_adr, val = write_back.select_write_back(self)
-        self.registers.write(reg_adr, val)
-
-        reg_adr, val = write_back.select_write_back_2nd(self)  # popq only
-        self.registers.write(reg_adr, val)
+        self.dstE, self.dstM = write_back.select_write_back(self)
+        self.registers.write_2_ports(self.dstE, self.dstM, self.valE, self.valM)
         return
 
     def update_PC(self):
-        # PC = ...
+        # PC = valP or other values
         val = update_PC.select_PC_val(self)
         self.PC = val
         return
 
-    def _clear_tmp(self):
-        self.valA = self.valB = self.valC = None
-        self.rA = self.rB = None
-        self.valE = self.valM = None
-        self.valP = None
-        self.valM = None
-        # ...
+    def cycle(self):
+        # when trying to run the cpu with an error stat code, raise error.
+        is_cycle = yield ''
+        stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
+              self.write_back_stage, self.update_PC]
+        while True:
+            for stage in stages:
+                try:
+                    stage()
+                    if not is_cycle:
+                        is_cycle = yield ''
+                except error.Halt as e:
+                    self.icode, self.ifun = 0, 0
+                    self.stat.set(2, self)
+                    err_msg = e.err_msg
+                except error.AddressError as e:
+                    if self.debug:
+                        print('address out of range!', e.err_msg)
+                    self.stat.set(3, self)
+                    err_msg = e.err_msg
+                except error.InstructionError as e:
+                    if self.debug:
+                        print('instruction error:', e.err_msg)
+                    self.stat.set(4, self)
+                    err_msg = e.err_msg
+                finally:
+                    if not self.stat.is_ok():
+                        if self.debug:
+                            print('bad stat code, throwing error')
+                        yield err_msg
+            # update history
+            self._history_stack.push(self._get_ctx())
+            # cycle: yield after a whole cycle
+            if is_cycle:
+                is_cycle = yield ''
 
-
+    # This method is for debugging
     def show_cpu(self, show_values=False, show_regs=False):
         print('ins name:', self.instruct_mem.get_instruction_name())
         if show_values:
@@ -184,11 +156,11 @@ class CPU():
             else:
                 print('valM: None')
 
-            print('valP:', self.valP)
-            print('rA:', self.rA)
-            print('rB:', self.rB)
+            print('valP:', self.valP.get_str_hex())
+            print('rA:', self.rA.get_str_hex())
+            print('rB:', self.rB.get_str_hex())
 
-        print('PC:', hex(self.PC))
+        print('PC:', self.PC.get_str_hex())
 
         if show_regs:
             self.registers.show_regs_hex(show_zero=True)
@@ -196,11 +168,48 @@ class CPU():
             print('\%rsp:', self.registers.show_rsp())
         self.cond_code.show()
 
+    def build_json_dic(self, format):
+        if format == 'str':  
+            PC = self.PC.get_str_hex()
+        else:
+            # format: int
+            PC = self.PC.get_signed_value_int10()
+        cpu_info = {'PC':PC, 'REG':self.registers.get_reg_dict(format = format), 'CC': self.cond_code.get_CC_dict()\
+            , 'STAT': self.stat.val, 'MEM': self.memory.get_mem_dict(format = format)} # current state of the cpu stored in a python dict
+        return cpu_info
+
     def get_cpu_vals(self):
-        vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB]
-        for val, i in zip(vals, list(range(len(vals)))):
-            if val is not None and i < 5:
-                vals[i] = val.get_str_hex()
-            if i == 5:
-                vals[i] = Word(val).get_str_hex()
-        return {'valA':vals[0], 'valB':vals[1], 'valC':vals[2], 'valE':vals[3], 'valM':vals[4], 'valP': vals[5], 'rA':vals[6], 'rB':vals[7]}
+        try:
+            vals = [self.valA, self.valB, self.valC, self.valE, self.valM, self.valP, self.rA, self.rB, self.srcA, self.srcB, self.dstE, self.dstM]
+        except:
+            vals = [None] * 12
+        names = ['valA', 'valB', 'valC', 'valE', 'valM', 'valP', 'rA', 'rB', 'srcA', 'srcB', 'dstE', 'dstM']
+        dic = {}
+        for name, val in zip(names, vals):
+            if val is not None:
+                dic[name] = val.get_str_hex()
+            else:
+                dic[name] = None
+        return dic
+
+    # Load the state of the prev step
+    def _get_ctx(self):
+        ctx = {'PC':copy.deepcopy(self.PC), 'REG':copy.deepcopy(self.registers), 'CC': self.cond_code.get_CC_dict()
+        , 'STAT': self.stat.val, 'MEM': copy.deepcopy(self.memory)}
+        return ctx
+
+    def _load_ctx(self, ctx):
+        self.PC = ctx['PC']
+        self.registers = ctx['REG']
+        self.cond_code.set(ctx['CC'])
+        self.stat.set(ctx['STAT'], self)
+        self.memory = ctx['MEM']
+        self.cycle_gen = self.cycle()
+        self.cycle_gen.send(None)
+
+    def last_cycle(self):
+        if self._history_stack.is_empty():
+            return False
+        else:
+            self._load_ctx(self._history_stack.pop())
+            return True 

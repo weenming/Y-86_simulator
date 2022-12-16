@@ -30,9 +30,13 @@ def upload():
         global f_text, code_dict
         code_dict = dict_trans(f_name)
         f_text = sim.get_ins("./upload/" + f_name)
-        cpu, mem_dict, rsp_min = sim.init_cpu(f_text)
-        
-        return jsonify({"code_dict": code_dict, "MEM": mem_dict, "TEMP": {"rsp_min": rsp_min}})
+        cpu, dic, err_msg, reg_file = sim.init_cpu(f_text)
+        dic.update({'TEMP': reg_file})
+        dic.update({"code_dict": code_dict})
+        dic['ERR'] = err_msg
+        print(dic)
+
+        return Response(json.dumps(dic), mimetype='application/json')
 
 
 # 读取路径为 './upload/' + file_name 的文件，并通过正则表达式处理，返回字典
@@ -66,14 +70,12 @@ def signal():
     signal = request.args.get('signal')
     if signal == 'instr':
         dic, err_msg, reg_file = sim.run_cpu(cpu, True)
-        dic.update({'TEMP': reg_file})
     elif signal == 'stage':
         dic, err_msg, reg_file = sim.run_cpu(cpu, False)
-        dic.update({'TEMP': reg_file})
     elif signal == 'reset':
-        cpu, mem_dict, rsp_min = sim.init_cpu(f_text)
-
-        return jsonify({"code_dict": code_dict, "MEM": mem_dict, "TEMP": {"rsp_min": rsp_min}})
+        cpu, dic, err_msg, reg_file = sim.init_cpu(f_text)
+        
+    dic.update({'TEMP': reg_file})
     dic['ERR'] = err_msg
     dic['TEMP']['rsp_min'] = str(cpu.memory.rsp_min)
     # 直接用jsonify会按照键值排序后输出

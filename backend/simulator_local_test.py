@@ -44,16 +44,6 @@ def str_to_byte_ls(input_str: str):
     return adr_of_ins, ins
 
 
-def build_json_dic(cpu:CPU, format):
-    if format == 'str':  
-        PC = Word(cpu.PC).get_str_hex()
-    else:
-        # format: int
-        PC = cpu.PC
-    cpu_info = {'PC':PC, 'REG':cpu.registers.get_reg_dict(format = format), 'CC': cpu.cond_code.get_CC_dict()\
-        , 'STAT': cpu.stat.val, 'MEM': cpu.memory.get_mem_dict(format = format)} # current state of the cpu stored in a python dict
-    return cpu_info
-
 def run_cpu(cpu:CPU, cycle, debug=False, format='str'):
     '''
     Runs the cpu, a whole cycle or a single step (stage?) specified by user 
@@ -67,9 +57,7 @@ def run_cpu(cpu:CPU, cycle, debug=False, format='str'):
     '''
     # empty msg: all good
     err_msg = cpu.run(cycle)
-    # update to the state before termination
-
-    return build_json_dic(cpu, format), err_msg, cpu.get_cpu_vals()
+    return cpu.build_json_dic(format), err_msg, cpu.get_cpu_vals()
 
 def init_cpu(ins:str, debug=False):
     '''
@@ -98,9 +86,12 @@ def init_cpu(ins:str, debug=False):
     cpu = CPU(mem)
     return cpu
 
-if __name__ == '__main__':
+def last_step(cpu:CPU):
+    # load last cycle!
+    return cpu.last_cycle()
 
-    cpu = init_cpu(get_ins('./test/prog10.yo'), debug=False)
+if __name__ == '__main__':
+    cpu = init_cpu(get_ins('./test/asumi.yo'), debug=False)
     '''
     in machine code the value is already stored by little endian....
     val_byte_ls = []
@@ -111,15 +102,29 @@ if __name__ == '__main__':
     cpu_info_dict_ls = []
 
     while True:
-        dic, err_msg, _ = run_cpu(cpu, True)
-        # print('error message:', err_msg)
-        # cpu.show_cpu(show_regs=True)
-        # cpu.memory.show_mem()
-        # print('\n')
-        cpu_info_dict_ls.append(build_json_dic(cpu, format='int'))
-        if err_msg != '':
-            break
-        
+        execute_msg = input('run for next cycle; prev for prev cycle')
+        if execute_msg == 'run':
+            dic, err_msg, _ = run_cpu(cpu, True)
+            print('error message:', err_msg)
+            cpu.show_cpu(show_regs=True)
+            print(cpu.get_cpu_vals())
+            cpu.memory.show_mem()
+            print('\n')
+            cpu_info_dict_ls.append(cpu.build_json_dic('int'))
+            if err_msg != '':
+                print(err_msg)
+        elif execute_msg == 'prev':
+            cpu_last = last_step(cpu)
+            if not cpu_last:
+                print('empty stack!')
+            else:
+                print('prev step, PC:', cpu.PC.get_str_hex())
+        elif execute_msg == 'run to end':
+            err_msg = ''
+            while err_msg == '':
+                _, err_msg, _ = run_cpu(cpu, True)
+        else:
+            print('bad input')
     # output the json file to stdout
     json.dump(cpu_info_dict_ls, sys.stdout)
     

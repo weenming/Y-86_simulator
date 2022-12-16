@@ -1,12 +1,12 @@
 '''
-This python file needs to include system path './../'
+This python file needs to include system path './'
 in order to import packages to test
 '''
 # Open this project in VS Code from the root dir
 # when run using the run button, VS Code runs this file from the root dir,
 # and thus the cur path is "Y-86_Simulator/".
 import sys
-sys.path.append("./")
+sys.path.append("./backend")
 
 from hardware import *
 from abstraction import *

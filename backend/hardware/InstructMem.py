@@ -2,6 +2,7 @@ import sys
 sys.path.append("./")
 
 from abstraction import *
+import hardware.Registers
 import error
 
 
@@ -25,10 +26,12 @@ class InstructMem():
         # set icode and others if applicable
         self.icode = self.data.get_bits(0, 4).get_value_int10()
         self.ifun = self.data.get_bits(4, 8).get_value_int10()
-        if 0 > self.icode or self.icode > 12:
+        if 0 > self.icode or self.icode > 12: # invalid instruction
             raise error.InstructionError('invalid icode')
         if not self._check_validity():
             raise error.InstructionError('invalid instruction')
+        if self.icode == 0: # halt
+            raise error.Halt()
         return self.icode, self.ifun
 
     def _check_validity(self):
@@ -53,14 +56,14 @@ class InstructMem():
         if self.icode in [2, 3, 4, 5, 6, 10, 11, 12]:
             rA = self.data.get_bits(8, 12).get_value_int10()
             rB = self.data.get_bits(12, 16).get_value_int10()
-            return rA, rB
+            return Byte(rA), Byte(rB)
         elif self.icode in [0, 1, 7, 8, 9]:
-            return 15, 15
+            return hardware.Registers.get_null_adr(), hardware.Registers.get_null_adr()
         else:
             assert 0, 'bad icode'
             return
 
-    def calc_valP(self):
-        return self.len
+    def calc_valP(self, last_PC: Word):
+        return Word(self.len + last_PC.get_signed_value_int10())
 
 

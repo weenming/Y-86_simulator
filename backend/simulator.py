@@ -44,15 +44,6 @@ def str_to_byte_ls(input_str: str):
     return adr_of_ins, ins
 
 
-def build_json_dic(cpu:CPU, format):
-    if format == 'str':  
-        PC = Word(cpu.PC).get_str_hex()
-    else:
-        # format: int
-        PC = cpu.PC
-    cpu_info = {'PC':PC, 'REG':cpu.registers.get_reg_dict(format = format), 'CC': cpu.cond_code.get_CC_dict()\
-        , 'STAT': cpu.stat.val, 'MEM': cpu.memory.get_mem_dict(format = format)} # current state of the cpu stored in a python dict
-    return cpu_info
 
 def run_cpu(cpu:CPU, cycle, debug=False, format='str'):
     '''
@@ -67,9 +58,8 @@ def run_cpu(cpu:CPU, cycle, debug=False, format='str'):
     '''
     # empty msg: all good
     err_msg = cpu.run(cycle)
-    # update to the state before termination
-
-    return build_json_dic(cpu, format), err_msg, cpu.get_cpu_vals()
+    rsp_min = cpu.memory.rsp_min
+    return cpu.build_json_dic(format).update({"rsp_min":rsp_min}), err_msg, cpu.get_cpu_vals()
 
 def init_cpu(ins:str, debug=False):
     '''
@@ -89,20 +79,19 @@ def init_cpu(ins:str, debug=False):
             byte_ls.append(Byte(0x0))
         for i in range(0, len(ins_str), 2):
             byte_ls.append(Byte('0x' + ins_str[i: i + 2]))
-    if debug:
-        print([byte.get_str_hex() for byte in byte_ls])
-        print(len(byte_ls))
     mem = Memory(byte_ls)
-    if debug:
-        print(mem.mem_bytes[0x37].get_str_hex())
     cpu = CPU(mem)
     
-    mem_dict = cpu.memory.get_mem_dict(format='str')
     rsp_min = cpu.memory.rsp_min
-    return cpu, mem_dict, rsp_min
+    dic = cpu.build_json_dic('str')
+    dic.update({"rsp_min":rsp_min})
+    return cpu, dic, '', cpu.get_cpu_vals()
+
+def last_step(cpu:CPU):
+    # load last cycle!
+    return cpu.last_cycle()
 
 if __name__ == '__main__':
-
     cpu, _, _ = init_cpu(get_ins_from_stdin(), debug=False)
     '''
     In machine code the value is already stored by little endian....
@@ -115,11 +104,7 @@ if __name__ == '__main__':
 
     while True:
         dic, err_msg, _ = run_cpu(cpu, True)
-        # print('error message:', err_msg)
-        # cpu.show_cpu(show_regs=True)
-        # cpu.memory.show_mem()
-        # print('\n')
-        cpu_info_dict_ls.append(build_json_dic(cpu, format='int'))
+        cpu_info_dict_ls.append(cpu.build_json_dic('int'))
         # Determine termination by the returned err_msg
         # In fact, the instance of CPU will not run after an error occurs.
         # see CPU.run for details
