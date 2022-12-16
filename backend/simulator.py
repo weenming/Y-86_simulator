@@ -89,12 +89,17 @@ def init_cpu(ins:str, debug=False):
     dic.update({"rsp_min":rsp_min})
     return cpu, dic, '', cpu.get_cpu_vals()
 
-def last_step(cpu:CPU):
+def last_cycle(cpu:CPU):
     # load last cycle!
-    return cpu.last_cycle()
+    success = cpu.last_cycle()
+        
+    rsp_min = cpu.memory.rsp_min
+    dic = cpu.build_json_dic('str')
+    dic.update({"rsp_min":rsp_min})
+    return success, dic, '', cpu.get_cpu_vals()
 
 if __name__ == '__main__':
-    cpu, _, _ = init_cpu(get_ins_from_stdin(), debug=False)
+    cpu, _, _, _ = init_cpu(get_ins_from_stdin(), debug=False)
     '''
     In machine code the value is already stored by little endian....
     val_byte_ls = []

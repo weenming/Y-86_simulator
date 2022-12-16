@@ -80,6 +80,15 @@ def signal():
     # 直接用jsonify会按照键值排序后输出
     return Response(json.dumps(dic), mimetype='application/json')
 
+@app.route('/last_step/')
+def last_step():
+    global cpu
+    success, dic, err_msg, reg_file = sim.last_cycle(cpu)
+    dic.update({'TEMP': reg_file})
+    dic['ERR'] = err_msg
+    dic['rsp_min'] = str(cpu.memory.rsp_min)
+    dic['success'] = success
+    return Response(json.dumps(dic), mimetype='application/json')
 
 
 if __name__ == '__main__':

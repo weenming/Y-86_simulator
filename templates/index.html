@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,13 +12,14 @@
     <link rel="stylesheet" type="text/css" href="../static/index.css" />
     <title>Y86 SEQ Simulator</title>
 </head>
+
 <body onload="init()">
     <div id="top_div">
         <div id="head">
             <h1 id="title">Y86 SEQ Simulator</h1>
         </div>
         <!-- 文件输入 -->
-        <div id="input" >
+        <div id="input">
             <div id="file_fake">
                 <input type="file" id="file" onchange="upload()">UPLOAD
             </div>
@@ -35,9 +37,11 @@
 
             <!-- 按钮交互 -->
             <div id="button_div">
-                <button id="one_instr" onclick="next('instr');">NEXT INSTRUCTION</button>
-                <button id="one_stage" onclick="next('stage');">NEXT STAGE</button>
                 <button id="reset" onclick="reset()">RESET</button>
+                <button id="one_instr" onclick="next('instr');">NEXT INSTRUCTION >></button>
+                <button id="one_stage" onclick="next('stage');">NEXT STAGE ></button>
+                <button id="prev_cycle" onclick="prev();">
+                    < LAST INSTRUCTION</button>
             </div>
 
             <!-- 阶段 -->
@@ -72,7 +76,7 @@
                 <table id="memory">
                 </table>
             </div>
-            
+
             <div id="small">
                 <!-- 程序计数器 -->
                 <div id="pc_div">
@@ -103,4 +107,5 @@
 
 
 </body>
+
 </html>

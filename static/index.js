@@ -56,6 +56,7 @@ function next(signal) {
                     url: 'signal/',
                     data: { 'signal': signal },
                     success: function (res) {
+                        // BUG: after refreshing page, stage should be zero
                         stage++;
                         if (stage >= 6) stage -= 6;
                         update(res);
@@ -70,12 +71,25 @@ function next(signal) {
     }
 }
 
+function prev() {
+    $.ajax({
+        url: 'last_step/',
+        success: function (res) {
+            if (res.success) {
+                stage = 0;
+                update(res);
+            } else {
+                alert("Last step failed: history record stack is empty")
+            }
+        }
+    })
+}
 
 // 重置
 function reset() {
     $.ajax({
         url: 'signal/',
-        data: { 'signal': 'reset' },    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
+        data: { 'signal': 'reset' },
         success: function (res) {
             init();
             $("#code").html(content(code_dict, 0));
@@ -100,8 +114,8 @@ function update(res) {
     mem_code_set(res);
     mem_frame_set(res);
     $(".changed").css("background-color", "rgb(143,255,203)");
-    
-    if (res.ERR != ''){
+
+    if (res.ERR != '') {
         alert(res.ERR);
     }
     run_flag = res.STAT;
@@ -125,10 +139,10 @@ function content(res, flag) {
         case 1: {
             // register table
             str = "<tr> <th>Registers</th> <th>Value</th> </tr>";
-            for (let i in res.REG){
+            for (let i in res.REG) {
                 if (last_res.REG[i] != res.REG[i])
                     str += "<tr class='changed'> <td>" + i + "</td> <td>" + full_str(res.REG[i]) + "</td> </tr>";
-                else 
+                else
                     str += "<tr class='unchanged'> <td>" + i + "</td> <td>" + full_str(res.REG[i]) + "</td> </tr>";
             }
             break;
@@ -138,17 +152,17 @@ function content(res, flag) {
             str = "<tr> <th>PC</th> </tr>";
             if (last_res.PC != res.PC)
                 str += "<tr class='changed'> <td>" + full_str(res.PC, 3) + "</td> </tr>";
-            else 
+            else
                 str += "<tr class='unchanged'> <td>" + full_str(res.PC, 3) + "</td> </tr>";
             break;
         }
         case 3: {
             // CC table
             str = "<tr> <th colspan='2'>CC</th> </tr>";
-            for (let i in res.CC){
+            for (let i in res.CC) {
                 if (last_res.CC[i] != res.CC[i])
                     str += "<tr class='changed'> <td>" + i + "</td> <td>" + res.CC[i] + "</td> </tr>";
-                else 
+                else
                     str += "<tr class='unchanged'> <td>" + i + "</td> <td>" + res.CC[i] + "</td> </tr>";
             }
             break;
@@ -158,7 +172,7 @@ function content(res, flag) {
             str = "<tr> <th>Stat</th> </tr>";
             if (last_res.STAT != res.STAT)
                 str += "<tr class='changed'> <td>" + res.STAT + "</td> </tr>";
-            else 
+            else
                 str += "<tr class='unchanged'> <td>" + res.STAT + "</td> </tr>";
             break;
         }
@@ -170,14 +184,14 @@ function content(res, flag) {
             let rows = mem_arr.length;
 
             // memory输出，地址从大到小，给memory table每行添加id: e.g. mem_16
-            for (let i = rows - 1; i >= 0; i --){
+            for (let i = rows - 1; i >= 0; i--) {
                 let addr_int = Number(mem_arr[i][0])
-                let addr_hex = '0x' + addr_int.toString(16); 
+                let addr_hex = '0x' + addr_int.toString(16);
                 let val = mem_arr[i][1];
                 let cls;
                 if (last_res.MEM[addr_int] != val)
                     cls = "changed";
-                else 
+                else
                     cls = "unchanged";
                 str += "<tr id='mem_" + addr_int + "' class='" + cls + "'> <td>" + full_str(addr_hex, 3) + "</td> <td>" + full_str(val) + "</td> </tr>";
             }
@@ -286,8 +300,8 @@ function next_code(res, option = 'next') {
 
 
 // 给memory代码段添加 code_mem 类
-function mem_code_set(res){
-    if (res.rsp_min != 0){
+function mem_code_set(res) {
+    if (res.rsp_min != 0) {
         for (let i in res.MEM) {
             if (i < Number(res.rsp_min))
                 $("#mem_" + i).addClass("code_mem")
@@ -297,7 +311,8 @@ function mem_code_set(res){
 }
 
 // 给memory栈帧添加 frame_mem 类
-function mem_frame_set(res){
+function mem_frame_set(res) {
+    console.log(res.REG.rsp, rsp_init)
     if (rsp_init == 0 && res.REG.rsp != 0)
         rsp_init = res.REG.rsp;
     if (res.REG.rsp < rsp_init) {
