@@ -144,6 +144,7 @@ table tr:nth-child(odd) {
 #stage_div table{
     width: 100%;
 }
+/* 
 #instr_mem, #reg_file, #ALU, #data_mem, #CC, #pc_inc, #PC{
     text-align: center;
     position: absolute;
@@ -191,7 +192,7 @@ table tr:nth-child(odd) {
     height: 26px;
     top: 50px;
     left: 80%;
-}
+} */
 
 
 /* Middle */

@@ -35,22 +35,22 @@
 
             <!-- 按钮交互 -->
             <div id="button_div">
-                <button id="one_instr" onclick="one_instr();">NEXT INSTRUCTION</button>
-                <button id="one_stage" onclick="one_stage();">NEXT STAGE</button>
+                <button id="one_instr" onclick="next('instr');">NEXT INSTRUCTION</button>
+                <button id="one_stage" onclick="next('stage');">NEXT STAGE</button>
                 <button id="reset" onclick="reset()">RESET</button>
             </div>
 
             <!-- 阶段 -->
             <div id="stage_div">
                 <!-- <p>Stage</p> -->
-                <!-- <table id="stage"></table> -->
-                <div id="instr_mem">Instruction Memory</div>
+                <table id="stage"></table>
+                <!-- <div id="instr_mem">Instruction Memory</div>
                 <div id="reg_file">Register File</div>
                 <div id="ALU">ALU</div>
                 <div id="data_mem">Data Memory</div>
                 <div id="CC">CC</div>
                 <div id="pc_inc">PC Increment</div>
-                <div id="PC">PC</div>
+                <div id="PC">PC</div> -->
             </div>
         </div>
 

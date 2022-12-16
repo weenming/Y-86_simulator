@@ -4,7 +4,7 @@ const STAGE_MAX = 6;
 const REGISTER_LIST = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', '/']
 const CC_LIST = ['ZF', 'SF', 'OF']
 const STAGE_NAME = ['FETCH', 'DECODE', 'EXECUTE', 'MEMORY', 'WRITE BACK', 'PC UPDATE']
-var run_flag = false;
+var run_flag = 0;
 
 
 function upload(){
@@ -22,45 +22,49 @@ function upload(){
             $("#code").html(content(code_dict, 0));
             $("#memory").html(content(res, 5))
             highlight(res, 'init');
-            run_flag = true;
+            run_flag = 1;
         }
     })
 }
 
-// 执行一条指令
-function one_instr(){
-    if (!run_flag) {
-        alert("ALERT: You should upload files first!")
-    }
-    else {
-        $.ajax({
-            url: 'signal/',
-            data: {'signal': 'instr'},    // signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
-            success: function(res){
-                stage = 0;
-                update(res);
+
+// signal='instr'：运行一个指令；signal='stage'：运行一个阶段，传参给后端
+function next(signal){
+    switch (run_flag) {
+        case 0: 
+            alert("ALERT: You should upload files first!"); break;
+        case 1: {
+            // 执行一条指令
+            if (signal == 'instr') {
+                $.ajax({
+                    url: 'signal/',
+                    data: {'signal': signal},
+                    success: function(res){
+                        stage = 0;
+                        update(res);
+                    }
+                })
             }
-        })
+            // 执行特定一阶段(fetch, decode, excute, memory, write back, PC update)
+            else if (signal == 'stage'){
+                $.ajax({
+                    url: 'signal/',
+                    data: {'signal': signal},
+                    success: function(res){
+                        stage++;
+                        if (stage >= 6) stage -= 6;
+                        update(res);
+                    }
+                })
+            }
+            break;
+        }
+        default: {
+            alert("ALERT: Not Executable!");
+        }
     }
 }
 
-// 执行特定一阶段(fetch, decode, excute, memory, write back, PC update)
-function one_stage(){
-    if (!run_flag) {
-        alert("ALERT: You should upload files first!")
-    }
-    else {
-        $.ajax({
-            url: 'signal/',
-            data: {'signal': 'stage'},       // signal='instr'：运行一条指令；signal='stage'：运行一个阶段，传参给后端
-            success: function(res){
-                stage++;
-                if (stage >= 6) stage -= 6;
-                update(res);
-            }
-        })
-    }
-}
 
 // 重置
 function reset(){
@@ -72,6 +76,7 @@ function reset(){
             $("#code").html(content(code_dict, 0));
             $("#memory").html(content(res, 5))
             highlight(res, 'init');
+            run_flag = 1;
         }
     })
 }
@@ -88,6 +93,7 @@ function update(res){
     if (res.ERR != ''){
         alert(res.ERR);
     }
+    run_flag = res.STAT;
 }
 
 // js写入HTML
@@ -145,13 +151,11 @@ function content(input, flag){
                 let val = mem_arr[i][1];
                 str += "<tr> <td>" + full_str(addr, 3) + "</td> <td>" + full_str(val) + "</td> </tr>";
             }
-
-
             break;
         }
         case 6: {
             // stage table
-            str = "<tr> <th>Stage</th> <th>" + STAGE_NAME[stage] + "</th> </tr>" +
+            str = "<tr> <th>Next Stage</th> <th>" + STAGE_NAME[stage] + "</th> </tr>" +
                   "<tr> <td>rA</td> <td>" + REGISTER_LIST[input.TEMP.rA] + "</td> </tr>" +
                   "<tr> <td>rB</td> <td>" + REGISTER_LIST[input.TEMP.rB] + "</td> </tr>" +
                   "<tr> <td>valA</td> <td>" + full_str(input.TEMP.valA) + "</td> </tr>" +
