@@ -97,6 +97,8 @@ class CPU():
         stages = [self.fetch_stage, self.decode_stage, self.execute_stage, self.memory_stage,\
               self.write_back_stage, self.update_PC]
         while True:
+            # update history
+            self._history_stack.push(self._get_ctx())
             for stage in stages:
                 try:
                     stage()
@@ -121,8 +123,6 @@ class CPU():
                         if self.debug:
                             print('bad stat code, throwing error')
                         yield err_msg
-            # update history
-            self._history_stack.push(self._get_ctx())
             # cycle: yield after a whole cycle
             if is_cycle:
                 is_cycle = yield ''
