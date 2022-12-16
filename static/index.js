@@ -28,6 +28,7 @@ function upload() {
             code_highlight(res, 'init');
             run_flag = 1;
             rsp_init = 0;
+            stage = 0;
         }
     })
 }
@@ -56,7 +57,6 @@ function next(signal) {
                     url: 'signal/',
                     data: { 'signal': signal },
                     success: function (res) {
-                        // BUG: after refreshing page, stage should be zero
                         stage++;
                         if (stage >= 6) stage -= 6;
                         update(res);
@@ -98,6 +98,7 @@ function reset() {
             run_flag = 1;
             last_res = res;
             rsp_init = 0;
+            stage = 0;
         }
     })
 }
