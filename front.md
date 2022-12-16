@@ -44,7 +44,8 @@ $ python setup.py
 - 执行 1 stage
 - 执行 1 cycle
 - 回退至本 cycle 的初始状态
-功能。后端接口函数返回的`json`格式的CPU状态等数据，可以发送到前端进行展示。前端接收到这个响应，也就接收了对应`json`数据，可以利用JavaScript，对数据进行处理，使得HTML表单内容发生相应改变。
+
+的功能。后端接口函数返回的`json`格式的CPU状态等数据，可以发送到前端进行展示。前端接收到这个响应，也就接收了对应`json`数据，可以利用JavaScript，对数据进行处理，使得HTML表单内容发生相应改变。
 
 类似地，点击`NEXT INSTRUCTION`, `NEXT STAGE`, `RESET`按钮后，前端传给后端json格式的数据，记为`{'signal': signal}`，根据按钮的不同，传的`signal`字符串的内容不同。后端可以对该数据进行处理，同样返回携带json数据的响应到前端。
 
