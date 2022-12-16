@@ -7,15 +7,15 @@ def select_write_back(cpu):
         return cpu.rB, null_adr
     elif cpu.icode == 2:
         if cpu.ifun == 0 or cpu.cnd == 1:
-            return null_adr, cpu.rB
+            return cpu.rB, null_adr
         else:
             return null_adr, null_adr
     elif cpu.icode == 5:  # mrmovq
-        return cpu.rA, null_adr
+        return null_adr, cpu.rA
     elif cpu.icode in [8, 9, 10]:
-        return null_adr, rsp_adr
+        return rsp_adr, null_adr
     elif cpu.icode in [11]:
-        return cpu.rA, rsp_adr
+        return rsp_adr, cpu.rA
     elif cpu.icode in [0, 1, 4, 7]:  # hlt, nop, rmmovq, jXX
         return null_adr, null_adr
     return

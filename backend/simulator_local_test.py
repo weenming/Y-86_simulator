@@ -112,10 +112,11 @@ if __name__ == '__main__':
 
     while True:
         dic, err_msg, _ = run_cpu(cpu, True)
-        # print('error message:', err_msg)
-        # cpu.show_cpu(show_regs=True)
-        # cpu.memory.show_mem()
-        # print('\n')
+        print('error message:', err_msg)
+        cpu.show_cpu(show_regs=True)
+        print(cpu.get_cpu_vals())
+        cpu.memory.show_mem()
+        print('\n')
         cpu_info_dict_ls.append(build_json_dic(cpu, format='int'))
         if err_msg != '':
             break
