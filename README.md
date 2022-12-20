@@ -1,13 +1,24 @@
 # Y86 Simulator
 
-## Backend
+## How to Run
+Use command `python setup.py` to invoke a local server at `http://127.0.0.1:5000`. You can visit this URL in a browser or click on the link shoen in the command line window (if supported). On the webpage you can upload files containing machine code and then run the simulator in real time.
+
+- The file should be formatted as those in the `./test/` folder. That is, after each line of code, insert `|` before assembly code or the next line.
+- Make sure flask is installed in your python environment. Our frontend is implemented using flask framework.
+
+
+## Local Tests
+- 请在项目的根目录下运行 `python test.py --bin "python backend/simulator.py"`来进行测试。所有测试需要大约5秒[^ourMachine]。
+- 可以看到答案和CMU发布的参考答案基本相同。[^wrong?]
+
+
+## Implementation of the simulator
 
 #### 接口
 `simulator.py`中提供
 - `init_CPU`，传入汇编代码字符串，返回初始化完成的`CPU`实例
   - 通过正则表达式将字符串转换为数据，从而初始化内存
 - `run_CPU`，传入参数指定执行1 stage还是1 cycle，返回这步完成后的状态json，和其他信息，如异常消息、`valA`等中间值
-
 
 
 #### 异常处理
@@ -19,11 +30,10 @@
   - 不会允许*写入*错误的地址/*读取*错误的指令，在进行非法操作的尝试后停止运行
   - 读取Halt指令*后*停止运行
   
-#### 测试用例
-- 请在项目的根目录下运行 `python test.py --bin "python backend/simulator.py"`来进行测试。所有测试需要大约5秒。
-- 我们的程序和`prog10.yo`的参考答案结果不同，最后一步中，我们的程序`rsp`为`0`，而参考答案为`-8`。如前所述，当出现地址错误时，我们的程序不会允许写入内存，而直接停止。由于Y86的约定是，先压栈再修改`rsp`，所以我们的程序停止时，`rsp`为`0`而非`-8`。这和测试用例所给答案不同，但我们认为我们的做法更合理些。
+## Implementation of the frontend
 
-### File structure
+
+## File structure
 backend
  ┣ abstraction
  ┃ ┣ data.py
@@ -59,3 +69,5 @@ backend
 
 
 [^stage]: stage, 比如fetch stage, decode stage, etc. 请参见`hardware/CPU`中的`CPU.cycle`方法
+[^ourMachine]: The CPU of Our machine is: AMD Ryzen R7-4800U
+[^wrong?]:　但其中`prog10.yo`的参考答案结果不同，最后一步中，我们的程序`rsp`为`0`，而参考答案为`-8`。如前所述，当出现地址错误时，我们的程序不会允许写入内存，而直接停止。由于Y86的约定是，先压栈再修改`rsp`，所以我们的程序停止时，`rsp`为`0`而非`-8`。这和测试用例所给答案不同，但我们认为我们的做法更合理些。
