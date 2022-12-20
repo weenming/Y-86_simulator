@@ -79,7 +79,7 @@ function prev() {
                 stage = 0;
                 update(res);
             } else {
-                alert("Last step failed: history record stack is empty")
+                alert("History record stack is empty")
             }
         }
     })
