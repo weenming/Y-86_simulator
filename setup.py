@@ -1,4 +1,6 @@
-import os, re, json
+import os
+import re
+import json
 from flask import Flask, request, render_template, Response
 from werkzeug.utils import secure_filename
 import backend.simulator as sim
@@ -6,9 +8,10 @@ import backend.simulator as sim
 global cpu, f_text, code_dict
 
 ALLOWED_EXTENSIONS = {'yo'}
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__),'upload')
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'upload')
 
 app = Flask(__name__)
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -26,7 +29,7 @@ def upload():
         f = request.files.get('file')
         f_name = secure_filename(f.filename)
         f.save(os.path.join(UPLOAD_FOLDER, f_name))
-        
+
         global f_text, code_dict
         code_dict = dict_trans(f_name)
         f_text = sim.get_ins("./upload/" + f_name)
@@ -45,7 +48,7 @@ def dict_trans(file_name):
     line = 1
     while 1:
         line_text = file.readline()
-        line_text.replace('\n','')
+        line_text.replace('\n', '')
         if not line_text:
             break
         # 正则表达式处理
@@ -58,7 +61,7 @@ def dict_trans(file_name):
             code = str_left[1]
         text = line_text.replace('\t', '')
         text = line_text.replace(' ', '&nbsp')
-        instr.append({'line':line, 'pc':pc, 'code':code, 'text':text})
+        instr.append({'line': line, 'pc': pc, 'code': code, 'text': text})
         line += 1
     return instr
 
@@ -73,12 +76,13 @@ def signal():
         dic, err_msg, reg_file = sim.run_cpu(cpu, False)
     elif signal == 'reset':
         cpu, dic, err_msg, reg_file = sim.init_cpu(f_text)
-    
+
     dic.update({'TEMP': reg_file})
     dic['ERR'] = err_msg
     dic['rsp_min'] = str(cpu.memory.rsp_min)
     # 直接用jsonify会按照键值排序后输出
     return Response(json.dumps(dic), mimetype='application/json')
+
 
 @app.route('/last_step/')
 def last_step():
