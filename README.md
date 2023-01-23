@@ -1,7 +1,7 @@
 # Y86 Simulator
 
 ## How to Run
-Use command `python setup.py` to invoke a local server at `http://127.0.0.1:5000`. You can visit this URL in a browser or click on the link shoen in the command line window (if supported). On the webpage you can upload files containing machine code and then run the simulator in real time.
+Use command `python setup.py` to invoke a local server at `http://127.0.0.1:5000`. You can visit this URL in a browser or click on the link shown in the command line window (if supported). On the webpage you can upload files containing machine code and then run the simulator in real time.
 
 - The file should be formatted as those in the `./test/` folder. That is, after each line of code, insert `|` before assembly code or the next line.
 - Make sure flask is installed in your python environment. Our frontend is implemented using flask framework.
