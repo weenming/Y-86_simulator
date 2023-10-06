@@ -8,27 +8,27 @@ Use command `python setup.py` to invoke a local server at `http://127.0.0.1:5000
 
 
 ## Local Tests
-- 请在项目的根目录下运行 `python test.py --bin "python backend/simulator.py"`来进行测试。所有测试需要大约5秒[^ourMachine]。
-- 可以看到答案和CMU发布的参考答案基本相同。[^wrong?]
+- To run the test, execute `python test.py --bin "python backend/simulator.py"` under the root directory of the project. The whole testing process takes about 5 seconds [^ourMachine].
+- The results are consistent with the officially published answers. [^wrong?]
 
 
 ## Implementation of the simulator
 
-#### 接口
-`simulator.py`中提供
-- `init_CPU`，传入汇编代码字符串，返回初始化完成的`CPU`实例
-  - 通过正则表达式将字符串转换为数据，从而初始化内存
-- `run_CPU`，传入参数指定执行1 stage还是1 cycle，返回这步完成后的状态json，和其他信息，如异常消息、`valA`等中间值
+#### API
+In `simulator.py`
+- String of assembly language code is passed in `init_CPU`, which returns the initialized instance of `CPU`.
+  - Convert the string into digits with the regular expression to initialize the memory.
+- `run_CPU` executes 1 stage or 1 cycle according to the argument passed in, and returns the state after this step as a JSON file, as well as other information, e.g. exceptions and intermediate values like `valA`.
 
 
-#### 异常处理
-- 根据异常状态码，我们使用3个Error类进行异常处理
+#### Exception Handling
+- Use 3 Error classes to handle exceptions
   - `Halt`
   - `InstructionError`
   - `AddressError`
-- 错误发生时，程序将抛出异常，并被CPU类的run方法中的异常处理语句接收。由于状态回退至异常发生的*一步*[^stage]之前，处理器的状态一定是即将发生错误的状态。更具体地说，我们的处理器
-  - 不会允许*写入*错误的地址/*读取*错误的指令，在进行非法操作的尝试后停止运行
-  - 读取Halt指令*后*停止运行
+- When an error occurs, an exception will be thrown and caught by the `run` method in `CPU`. Since the state is reverted back to *one step* [^stage] before the exception, the state of the CPU is before the error. More specifically, our CPU
+  - Does not allow to *write into* a wrong address or *read* a wrong instruction
+  - Stops *after* `Halt`.
   
 ## Implementation of the frontend
 
