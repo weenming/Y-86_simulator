@@ -70,4 +70,4 @@ backend
 
 [^stage]: stage, 比如fetch stage, decode stage, etc. 请参见`hardware/CPU`中的`CPU.cycle`方法
 [^ourMachine]: The CPU of Our machine is: AMD Ryzen R7-4800U
-[^wrong?]:　但其中`prog10.yo`的参考答案结果不同，最后一步中，我们的程序`rsp`为`0`，而参考答案为`-8`。如前所述，当出现地址错误时，我们的程序不会允许写入内存，而直接停止。由于Y86的约定是，先压栈再修改`rsp`，所以我们的程序停止时，`rsp`为`0`而非`-8`。这和测试用例所给答案不同，但我们认为我们的做法更合理些。
+[^wrong?]:　Except the result of `prog10.yo` is different from the reference. In the last step, the `rsp` of our CPU is `0` but in the reference, it is `-8`. As stated, when an address error occurs, our CPU will not allow writing into the wrong memory location but will stop immediately. Since the Y-86 protocol updates `rsp` after pushing into the stack, our `rsp` will not update before the error occurs and hence is `-8` when the CPU halts. We believe our implementation is more reasonable.
