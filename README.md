@@ -52,7 +52,7 @@ backend
  ┃ ┣ test_error.py
  ┃ ┣ test_mem.py
  ┃ ┣ test_regs.py
- ┃ ┗ x**_test.py
+ ┃ ┗ misc_test.py
  ┣ sequence
  ┃ ┣ decode.py
  ┃ ┣ execute.py
