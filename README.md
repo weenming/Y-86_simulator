@@ -34,6 +34,7 @@ In `simulator.py`
 
 
 ## File structure
+```
 backend
  ┣ abstraction
  ┃ ┣ data.py
@@ -65,7 +66,7 @@ backend
  ┣ simulator.py
  ┣ simulator_local_test.py
  ┗ __init__.py
-
+```
 
 
 [^stage]: stage, 比如fetch stage, decode stage, etc. Please refer to `CPU.cycle` in `hardware/CPU`.
