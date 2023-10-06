@@ -129,6 +129,7 @@ $ python setup.py
 - 我们的程序和`prog10.yo`的参考答案结果不同，最后一步中，我们的程序`rsp`为`0`，而参考答案为`-8`。如前所述，当出现地址错误时，我们的程序不会允许写入内存，而直接停止。由于Y86的约定是，先压栈再修改`rsp`，所以我们的程序停止时，`rsp`为`0`而非`-8`。这和测试用例所给答案不同，但我们认为我们的做法更合理些。
 
 ## 文件目录
+```
 backend
  ┣ abstraction
  ┃ ┣ data.py
@@ -146,7 +147,7 @@ backend
  ┃ ┣ test_error.py
  ┃ ┣ test_mem.py
  ┃ ┣ test_regs.py
- ┃ ┗ x**_test.py
+ ┃ ┗ misc_test.py
  ┣ sequence
  ┃ ┣ decode.py
  ┃ ┣ execute.py
@@ -160,7 +161,7 @@ backend
  ┣ simulator.py
  ┣ simulator_local_test.py
  ┗ __init__.py
-
+```
 
 # 收获和感悟
 ### Git
