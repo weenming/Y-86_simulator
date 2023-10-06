@@ -36,34 +36,63 @@ In `simulator.py`
 ## File structure
 backend
  ┣ abstraction
+ 
  ┃ ┣ data.py
+ 
  ┃ ┗ __init__.py
+ 
  ┣ hardware
+ 
  ┃ ┣ ALU.py
+ 
  ┃ ┣ Clock.py
+ 
  ┃ ┣ InstructMem.py
+ 
  ┃ ┣ Memory.py
+ 
  ┃ ┣ Registers.py
+ 
  ┃ ┗ __init__.py
+ 
  ┣ mytests
+ 
  ┃ ┣ test_cpu.py
+ 
  ┃ ┣ test_data.py
+ 
  ┃ ┣ test_error.py
+ 
  ┃ ┣ test_mem.py
+ 
  ┃ ┣ test_regs.py
+ 
  ┃ ┗ x**_test.py
+ 
  ┣ sequence
+ 
  ┃ ┣ decode.py
+ 
  ┃ ┣ execute.py
+ 
  ┃ ┣ fetch.py
+ 
  ┃ ┣ memory.py
+ 
  ┃ ┣ update_PC.py
+ 
  ┃ ┣ write_back.py
+ 
  ┃ ┗ __init__.py
+ 
  ┣ CPU.py
+ 
  ┣ error.py
+ 
  ┣ simulator.py
+ 
  ┣ simulator_local_test.py
+ 
  ┗ __init__.py
 
 
